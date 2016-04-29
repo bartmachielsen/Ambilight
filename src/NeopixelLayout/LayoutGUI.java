@@ -99,6 +99,22 @@ class LayoutPanel extends JPanel{
     private Shape[] motionSpaces = new Shape[4];
     private Shape hovershape = null;
     private Pixel[][] pixels = new Pixel[4][];
+    private enum  Side{
+        UPPER(),
+        RIGHT(),
+        UNDER(),
+        LEFT();
+        private int pixelAmount;
+        Side(){
+
+        }
+        public void setPixelAmount(int pixelAmount){
+            this.pixelAmount = pixelAmount;
+        }
+        public Pixel[] generatePixels(){
+
+        }
+    }
 
     public LayoutPanel(GraphicsDevice graphicsDevice) {
         super();
@@ -122,20 +138,15 @@ class LayoutPanel extends JPanel{
         int x = 0;
         int y = 0;
 
-        for(int ii = 0; ii < 4; ii++) {                             // USE OF ENUM      TODO CHECK IF ENUM IS BETTER
-            int numpixels = numpixelsX;
+        for(int i = 0; i < Side.values().length; i++) {                             // USE OF ENUM      TODO CHECK IF ENUM IS BETTER
+            Side side = Side.values()[i];
+            if(i % 2 != 0){
+                side.setPixelAmount(numpixelsY);
+            }else{
+                side.setPixelAmount(numpixelsX);
+            }
 
-            if( ii % 2 != 0){
-                    numpixels = numpixelsY;
-            }
-            pixels[ii] = new Pixel[numpixels];
-            for (int i = 0; i < numpixels; i++) {
-               if( ii % 2 != 0){
-                   pixels[ii][i] = new Pixel(new Point(getWidth()/numpixels,50));
-               }else{
-                   pixels[ii][i] = new Pixel(new Point(50, getHeight()/numpixels));
-               }
-            }
+
         }
     }
 
