@@ -8,6 +8,7 @@ import java.awt.*;
 public class Pixel {
     private Point location;
     private int id;
+    private double verhoudingX, verhoudingY;
 
     // NECESARIYLY????
     private Shape shape;
@@ -15,14 +16,25 @@ public class Pixel {
 
     /* GETTERS AND SETTERS*/
 
+
     public Point getLocation() {
         return location;
     }
 
-    public void setLocation(Point location) {
+    public void setLocation(Point location, int totalX, int totalY) {
         this.location = location;
+        this.verhoudingX = (location.getX() / (double) totalX);
+        this.verhoudingY = (location.getY() / (double) totalY);
     }
 
+
+    public int berekenLocatieX(int width) {
+        return (int) (width * verhoudingX);
+    }
+
+    public int berekenLocatieY(int height) {
+        return (int) (height * verhoudingY);
+    }
     public int getId() {
         return id;
     }
