@@ -1,23 +1,14 @@
 package NeopixelLayout;
 
 import javax.swing.*;
-import javax.swing.event.ChangeEvent;
-import javax.swing.event.ChangeListener;
 import java.awt.*;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
-import java.awt.geom.AffineTransform;
-import java.awt.geom.Point2D;
-import java.awt.geom.Rectangle2D;
-import java.awt.image.BufferedImage;
-import java.awt.image.PixelGrabber;
 
 /**
  * Created by Bart on 28-4-2016.
  */
 public class LayoutGUI extends JFrame {
     private GraphicsDevice[] graphicsDevices = null;
-
+    private LayoutPanel[] layoutPanels;
     public LayoutGUI(){
         // INITIALIZING JFRAME, SETTING VISIBLE AND LAYOUT
         super("PixelLayout Manager");
@@ -25,6 +16,7 @@ public class LayoutGUI extends JFrame {
         setSize(1500,600);
         setMinimumSize(new Dimension(1000,600));
         setDefaultCloseOperation(EXIT_ON_CLOSE);
+        setLocationRelativeTo(null);
         setBackground(Color.white);
         // SET WINDOWS STYLED
         try {
@@ -68,168 +60,44 @@ public class LayoutGUI extends JFrame {
         springLayout.putConstraint(SpringLayout.EAST,settingsPanel,0,SpringLayout.EAST,contentPane);
 
         // SETTINGSPANEL
-        settingsPanel.setLayout(new GridLayout(5,1));
+        settingsPanel.setLayout(new GridLayout(1, 7));
+
+        JPanel titlePanel = new JPanel();
+        titlePanel.setLayout(new FlowLayout());
         JLabel titleLabel = new JLabel("  PIXELSETTINGS");
         titleLabel.setFont(new Font("Helvetica" ,Font.BOLD,35));
+        titlePanel.add(titleLabel);
+        settingsPanel.add(titlePanel);
 
 
-        settingsPanel.add(titleLabel);
-
-
+        JPanel optionPanel = new JPanel();
+        optionPanel.setLayout(null);
+        //settingsPanel.add(optionPanel);                                                       TODO NICER UPPERBANNER
 
 
         //generating layout                                                                     TODO generate layout instead of fixed
         screenPanel.setLayout(new GridLayout(1,graphicsDevices.length));
-        LayoutPanel[] layoutPanels = new LayoutPanel[graphicsDevices.length];
+        layoutPanels = new LayoutPanel[graphicsDevices.length];
         for(int i = 0; i < graphicsDevices.length; i++){
-            layoutPanels[i] =  new LayoutPanel(graphicsDevices[i]);
+
+            if ((i + 1) >= graphicsDevices.length) {
+                Side[] block = {Side.LEFT};
+                layoutPanels[i] = new LayoutPanel(graphicsDevices[i], this, block);
+            } else if (i == 0 && graphicsDevices.length > 1) {
+                Side[] block = {Side.RIGHT};
+                layoutPanels[i] = new LayoutPanel(graphicsDevices[i], this, block);
+            } else {
+                layoutPanels[i] = new LayoutPanel(graphicsDevices[i], this);
+            }
             screenPanel.add(layoutPanels[i]);
         }
 
 
-
         revalidate();
+
+
     }
+
 
 }
 
-class LayoutPanel extends JPanel{
-    private GraphicsDevice graphicsDevice;
-    private int width,height;
-    private Shape[] motionSpaces = new Shape[4];
-    private Shape hovershape = null;
-    private Pixel[][] pixels = new Pixel[4][];
-    private enum  Side{
-        UPPER(),
-        RIGHT(),
-        UNDER(),
-        LEFT();
-        private int pixelAmount;
-        Side(){
-
-        }
-        public void setPixelAmount(int pixelAmount){
-            this.pixelAmount = pixelAmount;
-        }
-        public Pixel[] generatePixels(){
-
-        }
-    }
-
-    public LayoutPanel(GraphicsDevice graphicsDevice) {
-        super();
-        this.width = graphicsDevice.getDisplayMode().getWidth();
-        this.height = graphicsDevice.getDisplayMode().getHeight();
-        this.graphicsDevice = graphicsDevice;
-
-
-
-
-
-
-
-
-        revalidate();
-        repaint();
-    }
-
-
-    public void generatePixels(int numpixelsX, int numpixelsY){
-        int x = 0;
-        int y = 0;
-
-        for(int i = 0; i < Side.values().length; i++) {                             // USE OF ENUM      TODO CHECK IF ENUM IS BETTER
-            Side side = Side.values()[i];
-            if(i % 2 != 0){
-                side.setPixelAmount(numpixelsY);
-            }else{
-                side.setPixelAmount(numpixelsX);
-            }
-
-
-        }
-    }
-
-    @Override
-    protected void paintComponent(Graphics graphics) {
-        super.paintComponent(graphics);
-
-        generatePixels(5,5);
-
-        // GRAPHICS2D IS MUCH BETTER
-        Graphics2D graphics2D = (Graphics2D) graphics;
-
-        // SET BACKGROUNDCOLOR
-        graphics2D.setBackground(Color.white);
-
-
-
-
-
-        // CREATE SCREENBOX
-        Rectangle2D screenDimension = new Rectangle2D.Double(25,25,getWidth()-50,getHeight()-50);
-
-        // DRAW FILLED BOX ABOVE BACKGROUNDPICTURE                          TODO BETTER COLOR
-        graphics2D.setColor(new Color(163,255, 78,128));
-        graphics2D.fill(screenDimension);
-
-        // DRAW BORDER
-        graphics2D.setColor(Color.black);
-        graphics2D.draw(screenDimension);
-
-        // DRAW SCREEN INFORMATION
-        graphics2D.setFont(new Font("Arial",Font.BOLD,20));
-        graphics2D.drawString("Display " + graphicsDevice.getIDstring().split("y")[1]
-                                        + "  |  " + width + "x" + height,30,20);
-
-        for(Pixel[] pixels1 : pixels){
-            for(Pixel pixel : pixels1){
-                Rectangle2D rectangle2D = new Rectangle2D.Double(pixel.getLocation().getX(),pixel.getLocation().getY(),20,20);
-                graphics2D.fill(rectangle2D);
-            }
-        }
-
-
-
-    }
-}
-
-class PixelSettings {
-    public static Pixel[] pixelSetter(Pixel[] pixels, Shape shape, GraphicsDevice graphicsDevice){
-        Object[] options = {"Opslaan", "Genereren", "Terug" };
-
-
-        JPanel contentPane = new JPanel();
-        contentPane.setLayout(new GridLayout(10,1));
-        contentPane.add(new JLabel("AUTO CONFIGURATION"));
-        SpinnerNumberModel spinnerNumberModel = new SpinnerNumberModel(pixels.length,0,100,1);
-        JSpinner jSpinner = new JSpinner(spinnerNumberModel);
-        contentPane.add(jSpinner);
-
-
-
-
-
-
-        int keuze = JOptionPane.showOptionDialog(contentPane,contentPane,"pixelSettings",JOptionPane.YES_NO_CANCEL_OPTION,JOptionPane.PLAIN_MESSAGE,null,options,options[0]);
-
-        int value = (int)jSpinner.getValue();
-        if(value != pixels.length){
-            Pixel[] replacement = new Pixel[value];
-            if(shape.getBounds().getWidth() > shape.getBounds().getHeight()){
-                for(int i = 0; i < value; i++){
-                    replacement[i] = new Pixel(new Point((int)(((shape.getBounds().getWidth()-50)/value)+50),50));
-                }
-            }else{
-                for(int i = 0; i < value; i++){
-                    replacement[i] = new Pixel(new Point(50,(int)(((shape.getBounds().getHeight()-50)/value)+50)));
-                }
-            }
-            pixels = replacement;
-        }
-
-        return pixels;
-
-
-    }
-}
