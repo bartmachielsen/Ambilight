@@ -11,20 +11,17 @@ public class Pixel {
 
     // NECESARIYLY????
     private Shape shape;
-    public Pixel(Point location){
-        this.location = location;
-    }
-
-
 
 
     /* GETTERS AND SETTERS*/
-
 
     public Point getLocation() {
         return location;
     }
 
+    public void setLocation(Point location) {
+        this.location = location;
+    }
 
     public int getId() {
         return id;
