@@ -11,11 +11,8 @@ public class Pixel {
     private double verhoudingX, verhoudingY;
     private boolean idForced = false;
 
-    // NECESARIYLY????
-    private Shape shape;
 
 
-    private Shape pixelArea;
 
     /* GETTERS AND SETTERS*/
 
@@ -41,13 +38,7 @@ public class Pixel {
         this.id = id;
     }
 
-    public Shape getShape() {
-        return shape;
-    }
 
-    public void setShape(Shape shape) {
-        this.shape = shape;
-    }
 
 
     public boolean isIdForced() {
@@ -58,9 +49,7 @@ public class Pixel {
         this.idForced = idForced;
     }
 
-    public Shape getPixelArea() {
-        return pixelArea;
-    }
+
 
     public Shape generateEllipseArea(int width, int height) {
         return new Ellipse2D.Double(berekenLocatieX(width) - 37, berekenLocatieY(height) - 37, 150, 150);

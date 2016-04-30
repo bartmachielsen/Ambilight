@@ -12,25 +12,20 @@ import java.util.ArrayList;
  * Created by Bart Machielsen on 29-4-2016.
  */
 public class LayoutPanel extends JPanel {
-    private GraphicsDevice graphicsDevice;
     private int width, height;
     private int[] pixelSize = {5, 5, 5, 5};
-    private ArrayList<Side> sides;
     private Pixel selectedPixel = null;
     private boolean once = true;
     private boolean showArea = true;
+    private LayoutGraphics layoutGraphics;
 
-    public LayoutPanel(GraphicsDevice graphicsDevice, ArrayList<Side> sides) {
+    public LayoutPanel(LayoutGraphics layoutGraphics) {
         super();
-        this.width = graphicsDevice.getDisplayMode().getWidth();
-        this.height = graphicsDevice.getDisplayMode().getHeight();
-        this.graphicsDevice = graphicsDevice;
-        this.sides = sides;
+        this.layoutGraphics = layoutGraphics;
+        this.width = layoutGraphics.getGraphicsDevice().getDisplayMode().getWidth();
+        this.height = layoutGraphics.getGraphicsDevice().getDisplayMode().getHeight();
 
-        for (int i = 0; i < sides.size(); i++) {
-            sides.get(i).setPixelSize(pixelSize[i]);
-            sides.get(i).setVisible(true);
-        }
+
 
         revalidate();
         repaint();
@@ -40,11 +35,11 @@ public class LayoutPanel extends JPanel {
             @Override
             public void mouseClicked(MouseEvent e) {
                 super.mouseClicked(e);
-                for (Side side : sides) {
+                for (Side side : layoutGraphics.getSides()) {
                     for (int ii = 0; ii < side.getPixels().size(); ii++) {
-                        if (side.getPixels().get(ii).getShape().contains(e.getX(), e.getY())) {
-                            selectedPixel = side.getPixels().get(ii);
-                        }
+                        //if (side.getPixels().get(ii).getShape().contains(e.getX(), e.getY())) {   /// TODO VERVANGEN ZONDER SHAPE
+                          //  selectedPixel = side.getPixels().get(ii);
+                        //}
                     }
                 }
 
@@ -81,8 +76,8 @@ public class LayoutPanel extends JPanel {
         super.paintComponent(graphics);
 
         if (once) {
-            for (int i = 0; i < sides.size(); i++) {
-                sides.get(i).generatePixelsDrawing(getWidth(), getHeight());
+            for (int i = 0; i < layoutGraphics.getSides().size(); i++) {
+                layoutGraphics.getSides().get(i).generatePixelsDrawing(getWidth(), getHeight());
             }
             once = false;
         }
@@ -109,12 +104,12 @@ public class LayoutPanel extends JPanel {
 
         // DRAW SCREEN INFORMATION
         graphics2D.setFont(new Font("Arial", Font.BOLD, 20));
-        graphics2D.drawString("Display " + graphicsDevice.getIDstring().split("y")[1]
+        graphics2D.drawString("Display " + layoutGraphics.getGraphicsDevice().getIDstring().split("y")[1]
                 + "  |  " + width + "x" + height, 30, 20);
 
 
         // DRAW GENERATED PIXELS
-        for (Side side : sides) {
+        for (Side side : layoutGraphics.getSides()) {
             for (Pixel pixel : side.getPixels()) {
 
                 if (showArea) {
@@ -131,7 +126,7 @@ public class LayoutPanel extends JPanel {
                 Rectangle2D rectangle2D = new Rectangle2D.Double(pixel.berekenLocatieX(getWidth() - 50) + 25, pixel.berekenLocatieY(getHeight() - 50) + 25, 20, 20);
                 graphics2D.setColor(new Color(163, 255, 78, 255));
                 graphics2D.fill(rectangle2D);
-                pixel.setShape(rectangle2D);
+                //pixel.setShape(rectangle2D);
                 graphics2D.setColor(Color.black);
                 graphics2D.draw(rectangle2D);
 
@@ -152,15 +147,20 @@ public class LayoutPanel extends JPanel {
     }
 
     public ArrayList<Side> getSides() {
-        return sides;
+        return layoutGraphics.getSides();
     }
-
     public GraphicsDevice getGraphicsDevice() {
-        return graphicsDevice;
+        return layoutGraphics.getGraphicsDevice();
     }
 
     public void generate() {
         once = true;
         repaint();
+    }
+    public void createPixels(){
+        for (int i = 0; i < layoutGraphics.getSides().size(); i++) {
+            layoutGraphics.getSides().get(i).setPixelSize(pixelSize[i]);
+            layoutGraphics.getSides().get(i).setVisible(true);
+        }
     }
 }

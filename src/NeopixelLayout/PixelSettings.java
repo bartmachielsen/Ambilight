@@ -5,16 +5,29 @@ import javax.swing.border.EtchedBorder;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 
 /**
  * Created by Bart Machielsen on 30-4-2016.
  */
 public class PixelSettings extends JPanel {
-    public PixelSettings(LayoutPanel[] layoutPanels, LayoutGUI layoutGUI) {
+    public PixelSettings(LayoutPanel[] layoutPanels, LayoutGUI layoutGUI, LayoutSaver layoutSaver) {
         super();
         setLayout(new GridLayout(1, 3));
         setBorder(new EtchedBorder(EtchedBorder.LOWERED));
 
+        JPanel savePanel = new JPanel();
+        add(savePanel);
+        savePanel.setLayout(new FlowLayout());
+        JButton saveButton = new JButton("SAVE");
+        savePanel.add(saveButton);
+        saveButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent actionEvent) {
+                layoutSaver.save();
+            }
+        });
 
         String[] spinners = {"Bovenkant:   ", "Rechterkant: ", "Onderkant:   ", "Linkerkant:  "};
         JTabbedPane tabbedPane = new JTabbedPane();

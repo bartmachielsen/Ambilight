@@ -11,7 +11,7 @@ public class LayoutGUI extends JFrame {
     private GraphicsDevice[] graphicsDevices = null;
     private LayoutPanel[] layoutPanels;
 
-    public LayoutGUI() {
+    public LayoutGUI(LayoutSaver layoutSaver) {
         // INITIALIZING JFRAME, SETTING VISIBLE AND LAYOUT
         super("PixelLayout Manager");
         setBackground(Color.white);
@@ -64,7 +64,7 @@ public class LayoutGUI extends JFrame {
 
         JPanel titlePanel = new JPanel();
         titlePanel.setLayout(new FlowLayout());
-        JLabel titleLabel = new JLabel("  PIXELSETTINGS");
+        JLabel titleLabel = new JLabel("/t  PIXELSETTINGS");
         titleLabel.setFont(new Font("Helvetica", Font.BOLD, 35));
         titlePanel.add(titleLabel);
         settingsPanel.add(titlePanel);
@@ -78,36 +78,52 @@ public class LayoutGUI extends JFrame {
 
         screenPanel.setLayout(new GridLayout(1, graphicsDevices.length));
         layoutPanels = new LayoutPanel[graphicsDevices.length];
-        for (int i = 0; i < graphicsDevices.length; i++) {
-            ArrayList<Side> sides = new ArrayList<>();
-
-            for (int ii = 0; ii < 4; ii++)
-                sides.add(new Side(90 * ii));
-
-            if (i < graphicsDevices.length - 1)
-                sides.get(1).setVisible(false);
-
-            if (i > 0 && graphicsDevices.length > 1)
-                sides.get(3).setVisible(false);
 
 
-            layoutPanels[i] = new LayoutPanel(graphicsDevicesOmgedraaid[i], sides);
+        if(layoutSaver.getLayoutGraphicses().size() > 0){
+            for(int i = 0; i < layoutSaver.getLayoutGraphicses().size(); i++) {
+                layoutPanels[i] = new LayoutPanel(layoutSaver.getLayoutGraphicses().get(i));
+                screenPanel.add(layoutPanels[i]);
+            }
+        }else {
+            for (int i = 0; i < graphicsDevices.length; i++) {
 
-            screenPanel.add(layoutPanels[i]);
+                ArrayList<Side> sides = new ArrayList<>();
+
+                for (int ii = 0; ii < 4; ii++)
+                    sides.add(new Side(90 * ii));
+
+                if (i < graphicsDevices.length - 1)
+                    sides.get(1).setVisible(false);
+
+                if (i > 0 && graphicsDevices.length > 1)
+                    sides.get(3).setVisible(false);
+
+
+                LayoutGraphics layoutGraphics = new LayoutGraphics(graphicsDevicesOmgedraaid[i]);
+                layoutGraphics.setSides(sides);
+                layoutPanels[i] = new LayoutPanel(layoutGraphics);
+                layoutPanels[i].createPixels();
+                layoutPanels[i].generate();
+                layoutSaver.addLayoutGraphics(layoutGraphics);
+                screenPanel.add(layoutPanels[i]);
+            }
+
         }
-
-
         generateNumbers();
 
 
         //GENERATE PIXELSETTINGS SCREEN
-        PixelSettings optionPanel = new PixelSettings(layoutPanels, this);
+        PixelSettings optionPanel = new PixelSettings(layoutPanels, this, layoutSaver);
         settingsPanel.add(optionPanel);
 
 
 
 
         revalidate();
+        layoutSaver.save();
+
+
 
 
     }
@@ -134,7 +150,9 @@ public class LayoutGUI extends JFrame {
                         }
                     }
 
-            index = layoutPanels[i].getSides().get(0).giveNumber(index, forced);
+
+              index = layoutPanels[i].getSides().get(0).giveNumber(index, forced);
+
         }
 
         for (int i = 0; i < layoutPanels.length; i++)
