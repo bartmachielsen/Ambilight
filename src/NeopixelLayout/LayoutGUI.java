@@ -14,12 +14,12 @@ public class LayoutGUI extends JFrame {
     public LayoutGUI() {
         // INITIALIZING JFRAME, SETTING VISIBLE AND LAYOUT
         super("PixelLayout Manager");
+        setBackground(Color.white);
         setVisible(true);
-        setSize(1500, 600);
-        setMinimumSize(new Dimension(1000, 600));
+        setSize(1500, 800);
+        setMinimumSize(new Dimension(1000, 800));
         setDefaultCloseOperation(EXIT_ON_CLOSE);
         setLocationRelativeTo(null);
-        setBackground(Color.white);
         // SET WINDOWS STYLED
         try {
             UIManager.setLookAndFeel(
@@ -49,7 +49,7 @@ public class LayoutGUI extends JFrame {
 
 
         // SPRINGLAYOUT SETTINGS AND CONFIGURATION
-        springLayout.putConstraint(SpringLayout.NORTH, screenPanel, 200, SpringLayout.NORTH, contentPane);
+        springLayout.putConstraint(SpringLayout.NORTH, screenPanel, 300, SpringLayout.NORTH, contentPane);
         springLayout.putConstraint(SpringLayout.WEST, screenPanel, 0, SpringLayout.WEST, contentPane);
         springLayout.putConstraint(SpringLayout.SOUTH, screenPanel, 0, SpringLayout.SOUTH, contentPane);
         springLayout.putConstraint(SpringLayout.EAST, screenPanel, 0, SpringLayout.EAST, contentPane);
@@ -70,33 +70,42 @@ public class LayoutGUI extends JFrame {
         settingsPanel.add(titlePanel);
 
 
-        JPanel optionPanel = new JPanel();
-        optionPanel.setLayout(null);
-        //settingsPanel.add(optionPanel);                                                       TODO NICER UPPERBANNER
+        //generating layout
+        //                                                             TODO generate layout instead of fixed
+        GraphicsDevice[] graphicsDevicesOmgedraaid = new GraphicsDevice[graphicsDevices.length];
+        for (int i = 0; i < graphicsDevices.length; i++)
+            graphicsDevicesOmgedraaid[i] = graphicsDevices[(graphicsDevices.length - 1) - i];
 
-
-        //generating layout                                                                     TODO generate layout instead of fixed
         screenPanel.setLayout(new GridLayout(1, graphicsDevices.length));
         layoutPanels = new LayoutPanel[graphicsDevices.length];
         for (int i = 0; i < graphicsDevices.length; i++) {
             ArrayList<Side> sides = new ArrayList<>();
-            sides.add(new Side(0));
-            if (!(i < graphicsDevices.length - 1)) {
-                sides.add(new Side(90));
-            }
-            sides.add(new Side(180));
-            if (!(i > 0 && graphicsDevices.length > 1)) {
-                sides.add(new Side(270));
-            }
+
+            for (int ii = 0; ii < 4; ii++)
+                sides.add(new Side(90 * ii));
+
+            if (i < graphicsDevices.length - 1)
+                sides.get(1).setVisible(false);
+
+            if (i > 0 && graphicsDevices.length > 1)
+                sides.get(3).setVisible(false);
 
 
-            layoutPanels[i] = new LayoutPanel(graphicsDevices[i], sides);
+            layoutPanels[i] = new LayoutPanel(graphicsDevicesOmgedraaid[i], sides);
 
             screenPanel.add(layoutPanels[i]);
         }
 
 
         generateNumbers();
+
+
+        //GENERATE PIXELSETTINGS SCREEN
+        PixelSettings optionPanel = new PixelSettings(layoutPanels, this);
+        settingsPanel.add(optionPanel);
+
+
+
 
         revalidate();
 
@@ -105,28 +114,34 @@ public class LayoutGUI extends JFrame {
 
     public void generateNumbers() {
         int index = 0;
-        for (LayoutPanel layoutPanel : layoutPanels) {
-            for (Side side : layoutPanel.getSides()) {
-                if (side.getRotation() == 0) {
-                    index = side.giveNumber(index);
-                }
-            }
-        }
-        if (layoutPanels[layoutPanels.length - 1].getSides().get(1) != null) {
-            index = layoutPanels[layoutPanels.length - 1].getSides().get(1).giveNumber(index);
-        }
+        int[] forced = new int[20];
+        int forceindex = 0;
         for (int i = 0; i < layoutPanels.length; i++) {
-            for (Side side : layoutPanels[(layoutPanels.length - 1) - i].getSides()) {
-                if (side.getRotation() == 180) {
-                    index = side.giveNumber(index);
-                }
-            }
+            for (Side side : layoutPanels[i].getSides())
+                for (Pixel pixel : side.getPixels())
+                    if (pixel.isIdForced()) {
+                        boolean exists = false;
+                        for (int forcedExisting : forced) {
+                            if (forcedExisting == pixel.getId()) {
+                                exists = true;
+                            }
+                        }
+                        if (exists) {
+                            pixel.setIdForced(false);
+                        } else {
+                            forced[forceindex] = pixel.getId();
+                            forceindex++;
+                        }
+                    }
+
+            index = layoutPanels[i].getSides().get(0).giveNumber(index, forced);
         }
-        for (Side side : layoutPanels[0].getSides()) {
-            if (side.getRotation() == 270) {
-                index = side.giveNumber(index);
-            }
-        }
+
+        for (int i = 0; i < layoutPanels.length; i++)
+            for (int ii = 1; ii < layoutPanels[i].getSides().size(); ii++)
+                index = layoutPanels[(layoutPanels.length - 1) - i].getSides().get(ii).giveNumber(index, forced);
+
+
     }
 
 

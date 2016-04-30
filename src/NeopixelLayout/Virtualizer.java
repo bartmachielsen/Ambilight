@@ -1,12 +1,9 @@
 package NeopixelLayout;
 
-import javax.imageio.ImageIO;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.awt.image.BufferedImage;
-import java.io.File;
 import java.util.ArrayList;
 
 /**
@@ -26,13 +23,6 @@ public class Virtualizer {
         jFrame.setSize(300, 100);
         jFrame.setBackground(new Color(0, 0, 0, 0));
         frames.add(jFrame);
-
-        try {
-            BufferedImage bufferedImage = new Robot(graphicsDevice).createScreenCapture(graphicsDevice.getDefaultConfiguration().getBounds());
-            ImageIO.write(bufferedImage, "png", new File("Screenshot.png"));
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
 
 
         jFrame.setLayout(new FlowLayout());

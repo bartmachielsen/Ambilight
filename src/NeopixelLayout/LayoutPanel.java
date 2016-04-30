@@ -4,6 +4,7 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.awt.geom.Area;
 import java.awt.geom.Rectangle2D;
 import java.util.ArrayList;
 
@@ -15,7 +16,9 @@ public class LayoutPanel extends JPanel {
     private int width, height;
     private int[] pixelSize = {5, 5, 5, 5};
     private ArrayList<Side> sides;
-
+    private Pixel selectedPixel = null;
+    private boolean once = true;
+    private boolean showArea = true;
 
     public LayoutPanel(GraphicsDevice graphicsDevice, ArrayList<Side> sides) {
         super();
@@ -24,8 +27,10 @@ public class LayoutPanel extends JPanel {
         this.graphicsDevice = graphicsDevice;
         this.sides = sides;
 
-        for (int i = 0; i < sides.size(); i++)
-            sides.get(i).generatePixelsDrawing(getWidth(), getHeight(), pixelSize[i]);
+        for (int i = 0; i < sides.size(); i++) {
+            sides.get(i).setPixelSize(pixelSize[i]);
+            sides.get(i).setVisible(true);
+        }
 
         revalidate();
         repaint();
@@ -38,11 +43,33 @@ public class LayoutPanel extends JPanel {
                 for (Side side : sides) {
                     for (int ii = 0; ii < side.getPixels().size(); ii++) {
                         if (side.getPixels().get(ii).getShape().contains(e.getX(), e.getY())) {
-                            new PixelSettings(LayoutPanel.this, side.getPixels().get(ii));
+                            selectedPixel = side.getPixels().get(ii);
                         }
                     }
                 }
 
+            }
+
+            @Override
+            public void mousePressed(MouseEvent e) {
+                super.mousePressed(e);
+                mouseClicked(e);
+            }
+
+            @Override
+            public void mouseReleased(MouseEvent e) {
+                super.mouseReleased(e);
+                selectedPixel = null;
+            }
+        });
+
+        addMouseMotionListener(new MouseAdapter() {
+            @Override
+            public void mouseDragged(MouseEvent e) {
+                if (selectedPixel != null) {
+                    selectedPixel.setLocation(e.getX() - 30, e.getY() - 30, getWidth() - 50, getHeight() - 50);
+                    repaint();
+                }
             }
         });
 
@@ -53,12 +80,15 @@ public class LayoutPanel extends JPanel {
     protected void paintComponent(Graphics graphics) {
         super.paintComponent(graphics);
 
-        for (int i = 0; i < sides.size(); i++) {
-            sides.get(i).generatePixelsDrawing(getWidth(), getHeight(), pixelSize[i]);
+        if (once) {
+            for (int i = 0; i < sides.size(); i++) {
+                sides.get(i).generatePixelsDrawing(getWidth(), getHeight());
+            }
+            once = false;
         }
 
 
-        new Virtualizer(sides, graphicsDevice);
+        //new Virtualizer(sides, graphicsDevice);
         // GRAPHICS2D IS MUCH BETTER
         Graphics2D graphics2D = (Graphics2D) graphics;
 
@@ -70,7 +100,7 @@ public class LayoutPanel extends JPanel {
         Rectangle2D screenDimension = new Rectangle2D.Double(25, 25, getWidth() - 50, getHeight() - 50);
 
         // DRAW FILLED BOX ABOVE BACKGROUNDPICTURE
-        graphics2D.setColor(new Color(163, 255, 78, 128));
+        graphics2D.setColor(new Color(163, 255, 78, 100));
         graphics2D.fill(screenDimension);
 
         // DRAW BORDER
@@ -86,7 +116,19 @@ public class LayoutPanel extends JPanel {
         // DRAW GENERATED PIXELS
         for (Side side : sides) {
             for (Pixel pixel : side.getPixels()) {
-                Rectangle2D rectangle2D = new Rectangle2D.Double(pixel.getLocation().getX(), pixel.getLocation().getY(), 20, 20);
+
+                if (showArea) {
+                    Area area = new Area(new Rectangle2D.Double(0, 0, getWidth(), getHeight()));
+                    area.subtract(new Area(screenDimension));
+                    graphics2D.setColor(new Color(163, 255, 78, 150));
+                    Area area2 = new Area(pixel.generateEllipseArea(getWidth() - 50, getHeight() - 50));
+                    area2.subtract(area);
+                    graphics2D.fill(area2);
+
+                }
+
+
+                Rectangle2D rectangle2D = new Rectangle2D.Double(pixel.berekenLocatieX(getWidth() - 50) + 25, pixel.berekenLocatieY(getHeight() - 50) + 25, 20, 20);
                 graphics2D.setColor(new Color(163, 255, 78, 255));
                 graphics2D.fill(rectangle2D);
                 pixel.setShape(rectangle2D);
@@ -98,7 +140,10 @@ public class LayoutPanel extends JPanel {
                 if (pixel.getId() > 9) {
                     stringOffset = -2;
                 }
-                graphics2D.drawString(pixel.getId() + "", (int) (pixel.getLocation().getX() + 5) + stringOffset, (int) (pixel.getLocation().getY() + 15));
+                graphics2D.drawString(pixel.getId() + "", pixel.berekenLocatieX(getWidth() - 50) + 30 + stringOffset, pixel.berekenLocatieY(getHeight() - 50) + 40);
+
+
+
 
             }
         }
@@ -108,5 +153,14 @@ public class LayoutPanel extends JPanel {
 
     public ArrayList<Side> getSides() {
         return sides;
+    }
+
+    public GraphicsDevice getGraphicsDevice() {
+        return graphicsDevice;
+    }
+
+    public void generate() {
+        once = true;
+        repaint();
     }
 }
