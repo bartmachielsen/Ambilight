@@ -51,11 +51,11 @@ public class PixelSettings extends JPanel {
                 checkBox.addChangeListener(new ChangeListener() {
                     @Override
                     public void stateChanged(ChangeEvent e) {
-
-                        side.setVisible(checkBox.isSelected());
-                        layoutGUI.generateNumbers();
-                        layoutPanel.generate();
-                        layoutGUI.repaint();
+                        if(!(checkBox.isSelected() == side.isVisible())) {
+                            side.setVisible(checkBox.isSelected());
+                            layoutGUI.generateNumbers();
+                            layoutGUI.repaint();
+                        }
                     }
                 });
 
