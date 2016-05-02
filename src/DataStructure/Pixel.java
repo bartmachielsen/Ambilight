@@ -55,7 +55,7 @@ public class Pixel {
             red += colorTemp.getRed();
             green += colorTemp.getGreen();
             blue += colorTemp.getBlue();
-            alpha += colorTemp.getAlpha();
+            alpha += colorTemp.getAlpha(); 
         }
 
 
