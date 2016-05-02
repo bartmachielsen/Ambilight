@@ -12,7 +12,7 @@ import java.awt.event.ActionListener;
  * Created by Bart Machielsen on 30-4-2016.
  */
 public class PixelSettings extends JPanel {
-    public PixelSettings(LayoutPanel[] layoutPanels, LayoutGUI layoutGUI, LayoutSaver layoutSaver) {
+    public PixelSettings(ScreenPanel[] screenPanels, LayoutGUI layoutGUI, Configuration configuration) {
         super();
         setLayout(new GridLayout(1, 3));
         setBorder(new EtchedBorder(EtchedBorder.LOWERED));
@@ -25,33 +25,33 @@ public class PixelSettings extends JPanel {
         saveButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent actionEvent) {
-                layoutSaver.save();
+                configuration.save();
             }
         });
 
         String[] spinners = {"Bovenkant:   ", "Rechterkant: ", "Onderkant:   ", "Linkerkant:  "};
         JTabbedPane tabbedPane = new JTabbedPane();
-        for (LayoutPanel layoutPanel : layoutPanels) {
+        for (ScreenPanel screenPanel : screenPanels) {
             JPanel tab = new JPanel();
-            tabbedPane.addTab("D" + layoutPanel.getGraphicsDevice().getIDstring().split("D")[1], tab);
+            tabbedPane.addTab("D" + screenPanel.getGraphicsDevice().getIDstring().split("D")[1], tab);
 
             tab.setLayout(new GridLayout(4, 1));
             int i = 0;
-            for (Side side : layoutPanel.getSides()) {
+            for (ScreenSide screenSide : screenPanel.getSides()) {
                 JPanel sideTab = new JPanel();
                 sideTab.setLayout(new FlowLayout());
 
                 sideTab.add(new JLabel(spinners[i] + "      "));
 
-                JSpinner spinner = new JSpinner(new SpinnerNumberModel(side.getPixels().size(), 0, 20, 1));
+                JSpinner spinner = new JSpinner(new SpinnerNumberModel(screenSide.getPixels().size(), 0, 20, 1));
                 sideTab.add(spinner);
                 spinner.addChangeListener(new ChangeListener() {
                     @Override
                     public void stateChanged(ChangeEvent e) {
-                        if (side.getPixels().size() != (int) spinner.getValue()) {
-                            side.setPixelSize((int) spinner.getValue());
+                        if (screenSide.getPixels().size() != (int) spinner.getValue()) {
+                            screenSide.setPixelSize((int) spinner.getValue());
                             layoutGUI.generateNumbers();
-                            layoutPanel.generate();
+                            screenPanel.generate();
                             layoutGUI.repaint();
                         }
 
@@ -59,13 +59,13 @@ public class PixelSettings extends JPanel {
                 });
 
                 JCheckBox checkBox = new JCheckBox("Actief");
-                checkBox.setSelected(side.isVisible());
+                checkBox.setSelected(screenSide.isVisible());
                 sideTab.add(checkBox);
                 checkBox.addChangeListener(new ChangeListener() {
                     @Override
                     public void stateChanged(ChangeEvent e) {
-                        if(!(checkBox.isSelected() == side.isVisible())) {
-                            side.setVisible(checkBox.isSelected());
+                        if (!(checkBox.isSelected() == screenSide.isVisible())) {
+                            screenSide.setVisible(checkBox.isSelected());
                             layoutGUI.generateNumbers();
                             layoutGUI.repaint();
                         }

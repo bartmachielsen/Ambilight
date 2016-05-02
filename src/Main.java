@@ -1,20 +1,31 @@
+import ArduinoConnector.ArduinoConnector;
+import NeopixelLayout.Configuration;
 import NeopixelLayout.LayoutGUI;
-import NeopixelLayout.LayoutSaver;
 
 /**
  * Created by Bart on 28-4-2016.
  */
 public class Main {
+    public Main(){
+        Configuration configuration;
+        if ((configuration = Configuration.load()) == null) {
+            configuration = new Configuration();
+            configuration.updateAmbilight();
+            new LayoutGUI(configuration);
+        }else{
+            AmbiLoader ambiLoader = new AmbiLoader(configuration, new ArduinoConnector());
+
+            try {
+                Thread.sleep(6000);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+            ambiLoader.start();
+        }
+    }
+
     public static void main(String[] args) {
         new Main();
-    }
-    public Main(){
-        LayoutSaver layoutSaver;
-        if((layoutSaver = LayoutSaver.load()) == null) {
-            new LayoutGUI(new LayoutSaver());
-        }else{
-            new LayoutGUI(layoutSaver);
-        }
     }
 }
 

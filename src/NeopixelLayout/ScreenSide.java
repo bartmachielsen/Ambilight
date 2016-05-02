@@ -6,13 +6,13 @@ import java.util.ArrayList;
 /**
  * Created by Bart Machielsen on 29-4-2016.
  */
-public class Side {
+public class ScreenSide {
     private int rotation;
     private ArrayList<Pixel> pixels = new ArrayList<>();
     private boolean visible = true;
 
 
-    public Side(int rotation) {
+    public ScreenSide(int rotation) {
         this.rotation = rotation;
     }
 
@@ -80,10 +80,6 @@ public class Side {
 
     public void setVisible(boolean visible) {
         this.visible = visible;
-    }
-
-    public int getRotation() {
-        return rotation;
     }
 
     public ArrayList<Pixel> getPixels() {

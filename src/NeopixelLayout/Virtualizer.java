@@ -13,7 +13,7 @@ public class Virtualizer {
     ArrayList<JFrame> frames = new ArrayList<>();
 
     ///                                                                                                             TODO FIX THIS SHIT, NOT SO MUCH JFRAMES!!!!!
-    public Virtualizer(ArrayList<Side> sides, GraphicsDevice graphicsDevice) {
+    public Virtualizer(ArrayList<ScreenSide> screenSides, GraphicsDevice graphicsDevice) {
 
 
         GraphicsConfiguration graphicsConfiguration = graphicsDevice.getDefaultConfiguration();
@@ -43,8 +43,8 @@ public class Virtualizer {
         });
 
 
-        for (Side side : sides) {
-            for (Pixel pixel : side.getPixels()) {
+        for (ScreenSide screenSide : screenSides) {
+            for (Pixel pixel : screenSide.getPixels()) {
                 JFrame jFrame2 = new JFrame(graphicsConfiguration);
                 jFrame2.setUndecorated(true);
                 jFrame2.setVisible(true);

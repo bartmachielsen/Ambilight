@@ -2,6 +2,8 @@ package NeopixelLayout;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.util.ArrayList;
 
 /**
@@ -9,9 +11,9 @@ import java.util.ArrayList;
  */
 public class LayoutGUI extends JFrame {
     private GraphicsDevice[] graphicsDevices = null;
-    private LayoutPanel[] layoutPanels;
+    private ScreenPanel[] screenPanels;
 
-    public LayoutGUI(LayoutSaver layoutSaver) {
+    public LayoutGUI(Configuration configuration) {
         // INITIALIZING JFRAME, SETTING VISIBLE AND LAYOUT
         super("PixelLayout Manager");
         setBackground(Color.white);
@@ -27,6 +29,17 @@ public class LayoutGUI extends JFrame {
         } catch (Exception e) {
             e.printStackTrace();
         }
+
+
+        Timer timer = new Timer(1, new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                configuration.updateAmbilight();
+                repaint();
+            }
+        });
+        timer.start();
+
 
 
         // GETTING SCREEN AMOUNT
@@ -77,36 +90,36 @@ public class LayoutGUI extends JFrame {
             graphicsDevicesOmgedraaid[i] = graphicsDevices[(graphicsDevices.length - 1) - i];
 
         screenPanel.setLayout(new GridLayout(1, graphicsDevices.length));
-        layoutPanels = new LayoutPanel[graphicsDevices.length];
+        screenPanels = new ScreenPanel[graphicsDevices.length];
 
 
-        if(layoutSaver.getLayoutGraphicses().size() > 0){
-            for(int i = 0; i < layoutSaver.getLayoutGraphicses().size(); i++) {
-                layoutPanels[i] = new LayoutPanel(layoutSaver.getLayoutGraphicses().get(i));
-                screenPanel.add(layoutPanels[i]);
+        if (configuration.getLayoutGraphicses().size() > 0) {
+            for (int i = 0; i < configuration.getLayoutGraphicses().size(); i++) {
+                screenPanels[i] = new ScreenPanel(configuration.getLayoutGraphicses().get(i));
+                screenPanel.add(screenPanels[i]);
             }
         }else {
             for (int i = 0; i < graphicsDevices.length; i++) {
 
-                ArrayList<Side> sides = new ArrayList<>();
+                ArrayList<ScreenSide> screenSides = new ArrayList<>();
 
                 for (int ii = 0; ii < 4; ii++)
-                    sides.add(new Side(90 * ii));
+                    screenSides.add(new ScreenSide(90 * ii));
 
                 if (i < graphicsDevices.length - 1)
-                    sides.get(1).setVisible(false);
+                    screenSides.get(1).setVisible(false);
 
                 if (i > 0 && graphicsDevices.length > 1)
-                    sides.get(3).setVisible(false);
+                    screenSides.get(3).setVisible(false);
 
 
-                LayoutGraphics layoutGraphics = new LayoutGraphics(graphicsDevicesOmgedraaid[i]);
-                layoutGraphics.setSides(sides);
-                layoutPanels[i] = new LayoutPanel(layoutGraphics);
-                layoutPanels[i].createPixels();
-                layoutPanels[i].generate();
-                layoutSaver.addLayoutGraphics(layoutGraphics);
-                screenPanel.add(layoutPanels[i]);
+                ScreenConfiguration screenConfiguration = new ScreenConfiguration(graphicsDevicesOmgedraaid[i]);
+                screenConfiguration.setScreenSides(screenSides);
+                screenPanels[i] = new ScreenPanel(screenConfiguration);
+                screenPanels[i].createPixels();
+                screenPanels[i].generate();
+                configuration.addLayoutGraphics(screenConfiguration);
+                screenPanel.add(screenPanels[i]);
             }
 
         }
@@ -114,14 +127,14 @@ public class LayoutGUI extends JFrame {
 
 
         //GENERATE PIXELSETTINGS SCREEN
-        PixelSettings optionPanel = new PixelSettings(layoutPanels, this, layoutSaver);
+        PixelSettings optionPanel = new PixelSettings(screenPanels, this, configuration);
         settingsPanel.add(optionPanel);
 
 
 
 
         revalidate();
-        layoutSaver.save();
+        configuration.save();
 
 
 
@@ -132,9 +145,9 @@ public class LayoutGUI extends JFrame {
         int index = 0;
         int[] forced = new int[20];
         int forceindex = 0;
-        for (int i = 0; i < layoutPanels.length; i++) {
-            for (Side side : layoutPanels[i].getSides())
-                for (Pixel pixel : side.getPixels())
+        for (int i = 0; i < screenPanels.length; i++) {
+            for (ScreenSide screenSide : screenPanels[i].getSides())
+                for (Pixel pixel : screenSide.getPixels())
                     if (pixel.isIdForced()) {
                         boolean exists = false;
                         for (int forcedExisting : forced) {
@@ -151,13 +164,13 @@ public class LayoutGUI extends JFrame {
                     }
 
 
-              index = layoutPanels[i].getSides().get(0).giveNumber(index, forced);
+            index = screenPanels[i].getSides().get(0).giveNumber(index, forced);
 
         }
 
-        for (int i = 0; i < layoutPanels.length; i++)
-            for (int ii = 1; ii < layoutPanels[i].getSides().size(); ii++)
-                index = layoutPanels[(layoutPanels.length - 1) - i].getSides().get(ii).giveNumber(index, forced);
+        for (int i = 0; i < screenPanels.length; i++)
+            for (int ii = 1; ii < screenPanels[i].getSides().size(); ii++)
+                index = screenPanels[(screenPanels.length - 1) - i].getSides().get(ii).giveNumber(index, forced);
 
 
     }
