@@ -3,6 +3,7 @@ package MenuConfig;
 import AmbiUpdater.AmbiLoader;
 import ArduinoConnector.ArduinoConnector;
 import DataStructure.Configuration;
+import NeopixelLayout.LayoutGUI;
 import NeopixelLayout.Virtualizer;
 
 import javax.imageio.ImageIO;
@@ -44,7 +45,7 @@ public class Menu extends PopupMenu {
             }
         });
 
-        CheckboxMenuItem cb1 = new CheckboxMenuItem("Set auto size");
+
         CheckboxMenuItem cb2 = new CheckboxMenuItem("Ambilight Controller");
         AmbiLoader ambiLoader = new AmbiLoader(configuration, new ArduinoConnector());
         cb2.addItemListener(new ItemListener() {
@@ -65,6 +66,15 @@ public class Menu extends PopupMenu {
             }
         });
 
+        MenuItem PixelLayout = new MenuItem("Change PixelLayout");
+        PixelLayout.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                new LayoutGUI(configuration);
+            }
+        });
+
+
         MenuItem randomColor = new MenuItem("Random Kleur");
         randomColor.addActionListener(new ActionListener() {
             @Override
@@ -83,8 +93,8 @@ public class Menu extends PopupMenu {
 
 
         //Add components to pop-up menu
+        add(PixelLayout);
         addSeparator();
-        add(cb1);
         add(cb2);
         add(virtualizer1);
         addSeparator();
@@ -98,6 +108,7 @@ public class Menu extends PopupMenu {
 
             SystemTray systemTray = SystemTray.getSystemTray();
             systemTray.add(trayIcon);
+
         } catch (AWTException e) {
             e.printStackTrace();
         }

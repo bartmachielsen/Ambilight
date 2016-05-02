@@ -39,7 +39,6 @@ public class LayoutGUI extends JFrame {
         Timer timer = new Timer(1, new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                configuration.updateAmbilight();
                 repaint();
             }
         });
