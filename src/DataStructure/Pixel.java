@@ -52,13 +52,14 @@ public class Pixel {
             }
         }
         for (Color colorTemp : colors) {
-            red = +colorTemp.getRed();
-            green = +colorTemp.getGreen();
-            blue = +colorTemp.getBlue();
-            alpha = +colorTemp.getAlpha();
+            red += colorTemp.getRed();
+            green += colorTemp.getGreen();
+            blue += colorTemp.getBlue();
+            alpha += colorTemp.getAlpha();
         }
 
-        this.color = new Color(red, green, blue, alpha);
+
+        this.color = new Color(red / colors.size(), green / colors.size(), blue / colors.size(), alpha / colors.size());
     }
 
     private Color getARGB(int pixel) {
