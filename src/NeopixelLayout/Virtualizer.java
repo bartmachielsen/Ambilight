@@ -1,5 +1,10 @@
 package NeopixelLayout;
 
+import DataStructure.Configuration;
+import DataStructure.Pixel;
+import DataStructure.ScreenConfiguration;
+import DataStructure.ScreenSide;
+
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
@@ -10,65 +15,77 @@ import java.util.ArrayList;
  * Created by Bart Machielsen on 29-4-2016.
  */
 public class Virtualizer {
+
     ArrayList<JFrame> frames = new ArrayList<>();
+    boolean visible = false;
 
-    ///                                                                                                             TODO FIX THIS SHIT, NOT SO MUCH JFRAMES!!!!!
-    public Virtualizer(ArrayList<ScreenSide> screenSides, GraphicsDevice graphicsDevice) {
-
-
-        GraphicsConfiguration graphicsConfiguration = graphicsDevice.getDefaultConfiguration();
-        JFrame jFrame = new JFrame(graphicsConfiguration);
-        jFrame.setUndecorated(true);
-        jFrame.setVisible(true);
-        jFrame.setSize(300, 100);
-        jFrame.setBackground(new Color(0, 0, 0, 0));
-        frames.add(jFrame);
+    public Virtualizer(Configuration configuration) {
+        for (ScreenConfiguration screenConfiguration : configuration.getLayoutGraphicses()) {
+            GraphicsDevice graphicsDevice = screenConfiguration.getGraphicsDevice();
+            ArrayList<ScreenSide> screenSides = screenConfiguration.getScreenSides();
 
 
-        jFrame.setLayout(new FlowLayout());
-        jFrame.add(new JLabel(graphicsDevice.toString()));
+            GraphicsConfiguration graphicsConfiguration = graphicsDevice.getDefaultConfiguration();
 
-        jFrame.setLocation((int) (graphicsConfiguration.getBounds().x + graphicsConfiguration.getBounds().getWidth() / 2.0),
-                (int) (graphicsConfiguration.getBounds().y + graphicsConfiguration.getBounds().getHeight() / 2.0));
+            for (ScreenSide screenSide : screenSides) {
+                for (Pixel pixel : screenSide.getPixels()) {
+                    JFrame jFrame2 = new JFrame(graphicsConfiguration);
+                    jFrame2.setType(javax.swing.JFrame.Type.UTILITY);
+                    jFrame2.setUndecorated(true);
+                    JPanel content = new JPanel();
+                    jFrame2.setContentPane(content);
+                    jFrame2.setVisible(false);
+                    jFrame2.setAutoRequestFocus(true);
+                    int[] dimension = pixel.getScreenDimension((int) graphicsConfiguration.getBounds().getWidth(), (int) graphicsConfiguration.getBounds().getHeight());
+                    jFrame2.setSize(dimension[2], dimension[3]);
+                    content.setBackground(Color.blue);
+                    frames.add(jFrame2);
 
-        jFrame.addMouseListener(new MouseAdapter() {
-            @Override
-            public void mouseClicked(MouseEvent e) {
-                super.mouseClicked(e);
-                for (JFrame frame : frames) {
-                    frame.setVisible(true);
-                    frame.dispose();
-                }
-            }
-        });
+                    content.addMouseListener(new MouseAdapter() {
+                        /**
+                         * {@inheritDoc}
+                         *
+                         * @param e
+                         */
+                        @Override
+                        public void mouseClicked(MouseEvent e) {
+                            super.mouseClicked(e);
+                            System.out.println("CLICKED");
 
-
-        for (ScreenSide screenSide : screenSides) {
-            for (Pixel pixel : screenSide.getPixels()) {
-                JFrame jFrame2 = new JFrame(graphicsConfiguration);
-                jFrame2.setUndecorated(true);
-                jFrame2.setVisible(true);
-                jFrame2.setSize(30, 30);
-                jFrame2.setBackground(Color.blue);
-                frames.add(jFrame2);
-
-                jFrame2.setLocation(graphicsConfiguration.getBounds().x + pixel.berekenLocatieX(1920),
-                        graphicsConfiguration.getBounds().y + pixel.berekenLocatieY(1080));
-
-                jFrame2.addMouseListener(new MouseAdapter() {
-                    @Override
-                    public void mouseClicked(MouseEvent e) {
-                        super.mouseClicked(e);
-                        for (JFrame frame : frames) {
-                            frame.setVisible(true);
-                            frame.dispose();
+                            Color color = JColorChooser.showDialog(null, "Select color", Color.blue);
+                            if (color == null) return;
+                            for (JFrame frame : frames) {
+                                frame.getContentPane().setBackground(color);
+                            }
                         }
-                    }
-                });
+                    });
 
 
+                    jFrame2.setLocation(graphicsConfiguration.getBounds().x + pixel.berekenLocatieX(1920),
+                            graphicsConfiguration.getBounds().y + pixel.berekenLocatieY(1080));
+
+
+                }
             }
         }
     }
 
+    public void exit() {
+        for (JFrame frame : frames) {
+            frame.dispose();
+            frame.setVisible(false);
+            visible = false;
+        }
+    }
+
+    public void show() {
+        for(JFrame frame : frames){
+            frame.setVisible(true);
+            visible = true;
+        }
+    }
+
+    public boolean isVisible() {
+        return visible;
+    }
 }

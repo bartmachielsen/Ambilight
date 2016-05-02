@@ -1,8 +1,10 @@
+package AmbiUpdater;
+
 import ArduinoConnector.ArduinoConnector;
-import NeopixelLayout.Configuration;
-import NeopixelLayout.Pixel;
-import NeopixelLayout.ScreenConfiguration;
-import NeopixelLayout.ScreenSide;
+import DataStructure.Configuration;
+import DataStructure.Pixel;
+import DataStructure.ScreenConfiguration;
+import DataStructure.ScreenSide;
 
 import javax.swing.*;
 import java.awt.*;
@@ -16,14 +18,14 @@ import java.util.ArrayList;
  */
 public class AmbiLoader extends Thread implements ActionListener {
     private Timer ambitimer;
-    private int FRAMERATE = 1000;
+    private double FRAMERATE = 1000.0;
     private Configuration configuration;
     private ArduinoConnector arduinoConnector;
     private ArrayList<Pixel> pixelArrayList = new ArrayList<>();
     private ArrayList<Color> oldColor = new ArrayList<>();
 
     public AmbiLoader(Configuration configuration, ArduinoConnector arduinoConnector) {
-        ambitimer = new Timer(1000 / FRAMERATE, this);
+        ambitimer = new Timer((int) (1000.0 / FRAMERATE), this);
         this.configuration = configuration;
         this.arduinoConnector = arduinoConnector;
 
@@ -31,7 +33,7 @@ public class AmbiLoader extends Thread implements ActionListener {
             for (ScreenSide screenSide : screenConfiguration.getScreenSides()) {
                 for (Pixel pixel : screenSide.getPixels()) {
                     pixelArrayList.add(pixel);
-                    oldColor.add(pixel.getColor());
+                    oldColor.add(new Color(0, 0, 0));
                 }
             }
         }
@@ -48,12 +50,31 @@ public class AmbiLoader extends Thread implements ActionListener {
     @Override
     public void actionPerformed(ActionEvent e) {
         configuration.updateAmbilight();
+        ArrayList<Pixel> unused = new ArrayList<>();
         for (int i = 0; i < pixelArrayList.size(); i++) {
-            if (pixelArrayList.get(i).getColor() != oldColor.get(i)) {
+            if (!(pixelArrayList.get(i).getColor().getRGB() == oldColor.get(i).getRGB())) {
                 arduinoConnector.sendPixel(pixelArrayList.get(i));
                 oldColor.set(i, pixelArrayList.get(i).getColor());
+            } else {
+                unused.add(pixelArrayList.get(i));
             }
         }
 
     }
+
+    public void stopThread() {
+        ambitimer.stop();
+    }
+
+    public void restart() {
+        ambitimer.start();
+    }
+
+    public void setColor(Color color) {
+        for (Pixel pixel : pixelArrayList) {
+            pixel.setColor(color);
+            arduinoConnector.sendPixel(pixel);
+        }
+    }
+
 }

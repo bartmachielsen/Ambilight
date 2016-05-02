@@ -1,5 +1,8 @@
 package NeopixelLayout;
 
+import DataStructure.Configuration;
+import DataStructure.ScreenSide;
+
 import javax.swing.*;
 import javax.swing.border.EtchedBorder;
 import javax.swing.event.ChangeEvent;

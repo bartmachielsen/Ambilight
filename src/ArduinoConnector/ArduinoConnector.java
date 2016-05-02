@@ -1,6 +1,6 @@
 package ArduinoConnector;
 
-import NeopixelLayout.Pixel;
+import DataStructure.Pixel;
 import gnu.io.CommPortIdentifier;
 import gnu.io.SerialPort;
 import gnu.io.SerialPortEvent;
@@ -41,6 +41,7 @@ public class ArduinoConnector implements SerialPortEventListener {
         }
     }
 
+    /// TODO CONTROLEER EFFICIENTE EN PROBEREN ZO GOED MOGELIJK
     public void sendPixel(Pixel pixel) {
         try {
             byte[] array = new byte[4];

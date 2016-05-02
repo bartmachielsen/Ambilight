@@ -1,5 +1,9 @@
 package NeopixelLayout;
 
+import DataStructure.Pixel;
+import DataStructure.ScreenConfiguration;
+import DataStructure.ScreenSide;
+
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.MouseAdapter;

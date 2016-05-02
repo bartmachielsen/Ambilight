@@ -1,5 +1,6 @@
+import AmbiUpdater.AmbiLoader;
 import ArduinoConnector.ArduinoConnector;
-import NeopixelLayout.Configuration;
+import DataStructure.Configuration;
 import NeopixelLayout.LayoutGUI;
 
 /**

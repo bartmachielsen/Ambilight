@@ -1,4 +1,4 @@
-package NeopixelLayout;
+package DataStructure;
 
 import com.google.gson.Gson;
 import com.google.gson.stream.JsonReader;
