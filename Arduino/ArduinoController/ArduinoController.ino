@@ -27,6 +27,9 @@ void loop() {
   if(Serial.available() > 0){
       unsigned int waarde = Serial.read();
       values[i] = waarde;
+      if(waarde == 0){
+        Serial.write(0);
+      }
       i++;
   }
  }

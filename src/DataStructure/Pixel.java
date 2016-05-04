@@ -13,22 +13,29 @@ public class Pixel {
     private double verhoudingX, verhoudingY;
     private boolean idForced = false;           //  NECESSAIRY ?? CANT HE CHECK IF NUMBER IS LOGIC  TODO SEARCH OTHER SOLUTION
     private transient Color color;
+    private int checkWidth, checkHeight;
 
 
     public Pixel() {
         this.color = Color.white;
+        this.checkWidth = 100;
+        this.checkHeight = 100;
+
+
     }
 
 
 
     /* GETTERS AND SETTERS*/
-
-
     public void setLocation(int x, int y, int totalX, int totalY) {
         this.verhoudingX = (x / (double) totalX);
         this.verhoudingY = (y / (double) totalY);
     }
 
+    public void setCheck(int width, int height) {
+        this.checkHeight = height;
+        this.checkWidth = width;
+    }
 
     public int berekenLocatieX(int width) {
         return (int) (width * verhoudingX);
@@ -55,7 +62,7 @@ public class Pixel {
             red += colorTemp.getRed();
             green += colorTemp.getGreen();
             blue += colorTemp.getBlue();
-            alpha += colorTemp.getAlpha(); 
+            alpha += colorTemp.getAlpha();
         }
 
 
@@ -70,22 +77,21 @@ public class Pixel {
         return new Color(red, green, blue, alpha);
     }
 
-    public int[] getScreenDimension(int width, int height) {
+    public int[] getScreenDimension(int totalWidth, int totalHeight) {
         int[] dimension = new int[4];
 
-        int size = 100;
 
-        dimension[0] = berekenLocatieX(width) - size / 2;
-        if (dimension[0] >= width) dimension[0] = width - 1;
+        dimension[0] = berekenLocatieX(totalWidth) - checkWidth / 2;
+        if (dimension[0] >= totalWidth) dimension[0] = totalWidth - 1;
         if (dimension[0] < 0) dimension[0] = 0;
-        dimension[1] = berekenLocatieY(height) - size / 2;
-        if (dimension[1] >= height) dimension[1] = height - 1;
+        dimension[1] = berekenLocatieY(totalHeight) - checkHeight / 2;
+        if (dimension[1] >= totalHeight) dimension[1] = totalHeight - 1;
         if (dimension[1] < 0) dimension[1] = 0;
-        dimension[2] = size;
+        dimension[2] = checkWidth;
 
-        if (dimension[0] + dimension[2] >= width) dimension[2] = width - dimension[0];
-        dimension[3] = size;
-        if (dimension[1] + dimension[3] >= height) dimension[3] = height - dimension[1];
+        if (dimension[0] + dimension[2] >= totalWidth) dimension[2] = totalWidth - dimension[0];
+        dimension[3] = checkHeight;
+        if (dimension[1] + dimension[3] >= totalHeight) dimension[3] = totalHeight - dimension[1];
 
 
         return dimension;
