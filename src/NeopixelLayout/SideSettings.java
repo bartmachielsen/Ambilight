@@ -14,8 +14,8 @@ import java.awt.event.ActionListener;
 /**
  * Created by Bart Machielsen on 30-4-2016.
  */
-public class PixelSettings extends JPanel {
-    public PixelSettings(ScreenPanel[] screenPanels, LayoutGUI layoutGUI, Configuration configuration) {
+public class SideSettings extends JPanel {
+    public SideSettings(ScreenPanel[] screenPanels, LayoutGUI layoutGUI, Configuration configuration) {
         super();
         setLayout(new GridLayout(1, 3));
         setBorder(new EtchedBorder(EtchedBorder.LOWERED));

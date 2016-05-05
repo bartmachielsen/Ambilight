@@ -21,12 +21,14 @@ public class ArduinoConnector implements SerialPortEventListener {
     private OutputStream output;
     private BufferedReader input;
     private CommPortIdentifier bestPort;
+    private int send = 0;
+    private SerialPort serialPort;
 
     public ArduinoConnector() {
         getAvailablePorts();
         tryPorts();
         try {
-            SerialPort serialPort = (SerialPort) bestPort.open(this.getClass().getName(), 200);
+            serialPort = (SerialPort) bestPort.open(this.getClass().getName(), 2);
             serialPort.setSerialPortParams(9600, SerialPort.DATABITS_8, SerialPort.STOPBITS_1, SerialPort.PARITY_NONE);
 
             input = new BufferedReader(new InputStreamReader(serialPort.getInputStream()));
@@ -41,17 +43,39 @@ public class ArduinoConnector implements SerialPortEventListener {
         }
     }
 
-    /// TODO CONTROLEER EFFICIENTE EN PROBEREN ZO GOED MOGELIJK
+    /*
+    READY TO DELETE ??
     public void sendPixel(Pixel pixel) {
         try {
             byte[] array = new byte[4];
-            array[0] = (byte) ((pixel.getId()) - 1);
+            array[0] = (byte) ((pixel.getId()));
             array[1] = (byte) (pixel.getColor().getRed() / 2.0);
             array[2] = (byte) (pixel.getColor().getGreen() / 2.0);
             array[3] = (byte) (pixel.getColor().getBlue() / 2.0);
             output.write(array);
         } catch (Exception e) {
             e.printStackTrace();
+        }
+    }*/
+
+    public void sendPixels(Pixel... pixels) {
+        if (pixels.length > 0) {
+            try {
+                int i = 0;
+                byte[] array = new byte[pixels.length + 3];
+
+                for (Pixel pixel : pixels) {
+                    array[i] = (byte) ((pixel.getId()) + 128);
+                    i++;
+                }
+
+                array[i] = (byte) ((pixels[0].getColor().getRed() / 4.0) + 10);
+                array[i + 1] = (byte) ((pixels[0].getColor().getGreen() / 4.0) + 10);
+                array[i + 2] = (byte) ((pixels[0].getColor().getBlue() / 4.0) + 10);
+                output.write(array, 0, array.length);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
         }
     }
 
@@ -72,7 +96,7 @@ public class ArduinoConnector implements SerialPortEventListener {
         if (serialPortEvent.getEventType() == SerialPortEvent.DATA_AVAILABLE) {
             try {
                 int inputLine = input.read();
-                System.out.println(inputLine);
+                System.out.println("RECEIVED:" + inputLine);
             } catch (Exception e) {
                 System.err.println(e.toString());
             }

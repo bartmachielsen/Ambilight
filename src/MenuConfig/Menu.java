@@ -115,6 +115,12 @@ public class Menu extends PopupMenu {
     }
 
     public static void main(String[] args) {
-        new Menu();
+        Configuration configuration;
+        if ((configuration = Configuration.load()) == null) {
+            new LayoutGUI(new Configuration());
+        } else {
+            new Menu();
+        }
+
     }
 }

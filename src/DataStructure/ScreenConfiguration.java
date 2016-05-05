@@ -29,7 +29,6 @@ public class ScreenConfiguration {
             for (ScreenSide screenSide : screenSides) {
                 for (Pixel pixel : screenSide.getPixels()) {
                     int[] points = pixel.getScreenDimension(bufferedImage.getWidth(), bufferedImage.getHeight());
-
                     pixel.parseSubImage(bufferedImage.getSubimage(points[0], points[1], points[2], points[3]));
                 }
             }

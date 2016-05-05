@@ -131,7 +131,7 @@ public class LayoutGUI extends JFrame {
 
 
         //GENERATE PIXELSETTINGS SCREEN
-        PixelSettings optionPanel = new PixelSettings(screenPanels, this, configuration);
+        SideSettings optionPanel = new SideSettings(screenPanels, this, configuration);
         settingsPanel.add(optionPanel);
 
 
@@ -160,7 +160,7 @@ public class LayoutGUI extends JFrame {
                             }
                         }
                         if (exists) {
-                            pixel.setIdForced(false);
+                            //pixel.setIdForced(false);
                         } else {
                             forced[forceindex] = pixel.getId();
                             forceindex++;
