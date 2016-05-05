@@ -31,9 +31,10 @@ public class AnimationManager implements ActionListener {
     public static void main(String[] args) {
         Pixel pixel = new Pixel();
         pixel.setId(1);
-        Animation animation = new Animation(pixel, new Color(0, 0, 200));
+        Animation animation = new Animation(pixel, new Color(10, 100, 200));
         AnimationManager animationManager = new AnimationManager(100, new ArduinoConnector());
         animationManager.addAnimation(10, 60, animation);
+
         animationManager.start();
 
     }
@@ -51,7 +52,6 @@ public class AnimationManager implements ActionListener {
             animation.animate(arduinoConnector, currentTime);
         }
         currentTime++;
-
     }
 
     public void addAnimation(int startTime, int endTime, Animation animation) {

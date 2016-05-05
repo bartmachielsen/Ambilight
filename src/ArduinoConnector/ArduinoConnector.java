@@ -52,6 +52,7 @@ public class ArduinoConnector implements SerialPortEventListener {
             serialPort.addEventListener(this);
             serialPort.notifyOnDataAvailable(true);
 
+            Thread.sleep(1000);
             return true;
         } catch (Exception e) {
             return false;
@@ -82,12 +83,7 @@ public class ArduinoConnector implements SerialPortEventListener {
     }
 
     public CommPortIdentifier tryPorts(CommPortIdentifier[] commPortIdentifiers) {
-        for (CommPortIdentifier commPortIdentifier : commPortIdentifiers) {
-            if (connect(commPortIdentifier) == true) {
-                return commPortIdentifier;
-            }
-        }
-        return null;
+        return commPortIdentifiers[1];          //  TODO FIND WAY TO FIND OUT IF IT'S A ARDUINO OR OTHER DEVICE
     }
 
     @Override

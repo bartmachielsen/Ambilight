@@ -25,11 +25,11 @@ public class Animation {
     }
 
     public void animate(ArduinoConnector arduinoConnector, int currentTime) {
-        //addColor(startEffect.getEffect(color.getRed()),startEffect.getEffect(color.getGreen()),startEffect.getEffect(color.getBlue()));
+        addColor(startEffect.getEffect(color.getRed()), startEffect.getEffect(color.getGreen()), startEffect.getEffect(color.getBlue()));
 
 
-        // pixel.setColor(tempColor);
-        pixel.setColor(Color.blue);
+        pixel.setColor(tempColor);
+        //pixel.setColor(color);
         arduinoConnector.sendPixels(pixel);
     }
 
