@@ -47,9 +47,6 @@ public class Pixel {
 
     public void parseSubImage(BufferedImage bufferedImage) {
 
-        BufferedImage image = new BufferedImage(bufferedImage.getWidth(), bufferedImage.getHeight(), BufferedImage.TYPE_3BYTE_BGR);
-        ((image.getGraphics())).drawImage(bufferedImage, 0, 0, null);
-
         int red = 0;
         int green = 0;
         int blue = 0;
