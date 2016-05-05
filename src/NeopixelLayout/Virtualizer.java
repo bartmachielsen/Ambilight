@@ -61,8 +61,8 @@ public class Virtualizer {
                     });
 
 
-                    jFrame2.setLocation(graphicsConfiguration.getBounds().x + pixel.berekenLocatieX(1920),
-                            graphicsConfiguration.getBounds().y + pixel.berekenLocatieY(1080));
+                    jFrame2.setLocation(graphicsConfiguration.getBounds().x + dimension[0],
+                            graphicsConfiguration.getBounds().y + dimension[1]);
 
 
                 }

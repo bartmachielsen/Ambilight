@@ -12,16 +12,16 @@ public class Pixel {
     private boolean idForced = false;           //  NECESSAIRY ?? CANT HE CHECK IF NUMBER IS LOGIC  TODO SEARCH OTHER SOLUTION
     private transient Color color;
     private int checkWidth, checkHeight, checkX, checkY;
+    private transient ScreenSide screenSide;
 
 
     public Pixel() {
         this.color = Color.white;
         this.checkWidth = 100;
         this.checkHeight = 100;
-        this.checkX = -100;
-        this.checkY = -100;
 
     }
+
 
 
 
@@ -31,6 +31,10 @@ public class Pixel {
         this.verhoudingY = (y / (double) totalY);
     }
 
+
+    public void setScreenSide(ScreenSide screenSide) {
+        this.screenSide = screenSide;
+    }
 
     public int berekenLocatieX(int width) {
         return (int) (width * verhoudingX);
@@ -66,6 +70,27 @@ public class Pixel {
         int[] dimension = new int[4];
         int x = berekenLocatieX(totalWidth);
         int y = berekenLocatieY(totalHeight);
+
+        int size = 300;
+
+        switch (screenSide.getRotation()) {
+            case 0:
+                y = size / 2;
+                checkHeight = size;
+                break;
+            case 90:
+                x = totalWidth - size / 2;
+                checkWidth = size;
+                break;
+            case 180:
+                y = totalHeight - size / 2;
+                checkHeight = size;
+                break;
+            case 270:
+                x = size / 2;
+                checkWidth = size;
+                break;
+        }
 
 
         dimension[0] = x - checkWidth / 2;
@@ -105,8 +130,6 @@ public class Pixel {
     }
 
 
-    public void setPixelStrategy(ScreenStrategy screenStrategy) {
 
-    }
 
 }

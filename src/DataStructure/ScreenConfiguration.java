@@ -45,6 +45,12 @@ public class ScreenConfiguration {
             if (graphicsDevice.getIDstring().equals(graphicsID))
                 this.graphicsDevice = graphicsDevice;
         }
+
+        for (ScreenSide screenSide : screenSides) {
+            for (Pixel pixel : screenSide.getPixels()) {
+                pixel.setScreenSide(screenSide);
+            }
+        }
     }
 
     public ArrayList<ScreenSide> getScreenSides() {

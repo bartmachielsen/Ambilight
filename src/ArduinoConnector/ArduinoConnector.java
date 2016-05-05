@@ -17,46 +17,46 @@ import java.util.Enumeration;
  * Created by Bart Machielsen on 1-5-2016.
  */
 public class ArduinoConnector implements SerialPortEventListener {
-    private ArrayList<CommPortIdentifier> commPortIdentifiers = new ArrayList<>();
     private OutputStream output;
     private BufferedReader input;
-    private CommPortIdentifier bestPort;
     private int send = 0;
     private SerialPort serialPort;
 
     public ArduinoConnector() {
-        getAvailablePorts();
-        tryPorts();
+        connect(tryPorts(getAvailablePorts()));
+
+    }
+
+    public static CommPortIdentifier[] getAvailablePorts() {
+        Enumeration ports = CommPortIdentifier.getPortIdentifiers();
+        ArrayList<CommPortIdentifier> commPortIdentifiers = new ArrayList<>();
+        while (ports.hasMoreElements()) {
+            commPortIdentifiers.add((CommPortIdentifier) ports.nextElement());
+        }
+
+        CommPortIdentifier[] commPortIdentifiers1 = new CommPortIdentifier[commPortIdentifiers.size()];
+        return commPortIdentifiers.toArray(commPortIdentifiers1);
+
+
+    }
+
+    public boolean connect(CommPortIdentifier commPortIdentifier) {
         try {
-            serialPort = (SerialPort) bestPort.open(this.getClass().getName(), 2);
+            serialPort = (SerialPort) commPortIdentifier.open(this.getClass().getName(), 2);
             serialPort.setSerialPortParams(9600, SerialPort.DATABITS_8, SerialPort.STOPBITS_1, SerialPort.PARITY_NONE);
 
             input = new BufferedReader(new InputStreamReader(serialPort.getInputStream()));
             output = serialPort.getOutputStream();
 
+
             serialPort.addEventListener(this);
             serialPort.notifyOnDataAvailable(true);
 
-
+            return true;
         } catch (Exception e) {
-            e.printStackTrace();
+            return false;
         }
     }
-
-    /*
-    READY TO DELETE ??
-    public void sendPixel(Pixel pixel) {
-        try {
-            byte[] array = new byte[4];
-            array[0] = (byte) ((pixel.getId()));
-            array[1] = (byte) (pixel.getColor().getRed() / 2.0);
-            array[2] = (byte) (pixel.getColor().getGreen() / 2.0);
-            array[3] = (byte) (pixel.getColor().getBlue() / 2.0);
-            output.write(array);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }*/
 
     public void sendPixels(Pixel... pixels) {
         if (pixels.length > 0) {
@@ -69,26 +69,25 @@ public class ArduinoConnector implements SerialPortEventListener {
                     i++;
                 }
 
-                array[i] = (byte) ((pixels[0].getColor().getRed() / 4.0) + 10);
-                array[i + 1] = (byte) ((pixels[0].getColor().getGreen() / 4.0) + 10);
-                array[i + 2] = (byte) ((pixels[0].getColor().getBlue() / 4.0) + 10);
-                output.write(array, 0, array.length);
+                array[pixels.length] = (byte) (((pixels[0].getColor().getRed() / 4.0) + 10));
+                array[pixels.length + 1] = ((byte) ((pixels[0].getColor().getGreen() / 4.0) + 10));
+                array[pixels.length + 2] = ((byte) ((pixels[0].getColor().getBlue() / 4.0) + 10));
+
+
+                output.write(array);
             } catch (Exception e) {
                 e.printStackTrace();
             }
         }
     }
 
-
-    public void getAvailablePorts() {
-        Enumeration ports = CommPortIdentifier.getPortIdentifiers();
-        while (ports.hasMoreElements()) {
-            commPortIdentifiers.add((CommPortIdentifier) ports.nextElement());
+    public CommPortIdentifier tryPorts(CommPortIdentifier[] commPortIdentifiers) {
+        for (CommPortIdentifier commPortIdentifier : commPortIdentifiers) {
+            if (connect(commPortIdentifier) == true) {
+                return commPortIdentifier;
+            }
         }
-    }
-
-    public void tryPorts() {
-        bestPort = commPortIdentifiers.get(1);      // TODO TRY METHODE!
+        return null;
     }
 
     @Override

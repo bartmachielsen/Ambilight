@@ -9,6 +9,8 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import java.util.ArrayList;
 
 /**
@@ -18,14 +20,14 @@ public class LayoutGUI extends JFrame {
     private GraphicsDevice[] graphicsDevices = null;
     private ScreenPanel[] screenPanels;
 
-    public LayoutGUI(Configuration configuration) {
+    public LayoutGUI(Configuration configuration, boolean openMenu) {
         // INITIALIZING JFRAME, SETTING VISIBLE AND LAYOUT
         super("PixelLayout Manager");
         setBackground(Color.white);
         setVisible(true);
         setSize(1500, 800);
         setMinimumSize(new Dimension(1000, 800));
-        setDefaultCloseOperation(EXIT_ON_CLOSE);
+        setDefaultCloseOperation(HIDE_ON_CLOSE);
         setLocationRelativeTo(null);
         // SET WINDOWS STYLED
         try {
@@ -45,6 +47,26 @@ public class LayoutGUI extends JFrame {
         timer.start();
 
 
+        addWindowListener(new WindowAdapter() {
+            /**
+             * Invoked when a window is in the process of being closed.
+             * The close operation can be overridden at this point.
+             *
+             * @param e
+             */
+            @Override
+            public void windowClosing(WindowEvent e) {
+                super.windowClosing(e);
+                if (openMenu) {
+                    new MenuConfig.Menu();
+                }
+                timer.stop();
+            }
+        });
+
+
+
+
 
         // GETTING SCREEN AMOUNT
         graphicsDevices = GraphicsEnvironment.getLocalGraphicsEnvironment().getScreenDevices();
@@ -60,6 +82,7 @@ public class LayoutGUI extends JFrame {
 
         JPanel settingsPanel = new JPanel();
         contentPane.add(settingsPanel);
+
 
         JPanel screenPanel = new JPanel();
         contentPane.add(screenPanel);
@@ -81,7 +104,7 @@ public class LayoutGUI extends JFrame {
 
         JPanel titlePanel = new JPanel();
         titlePanel.setLayout(new FlowLayout());
-        JLabel titleLabel = new JLabel("/t  PIXELSETTINGS");
+        JLabel titleLabel = new JLabel("PIXELSETTINGS");
         titleLabel.setFont(new Font("Helvetica", Font.BOLD, 35));
         titlePanel.add(titleLabel);
         settingsPanel.add(titlePanel);
@@ -131,8 +154,10 @@ public class LayoutGUI extends JFrame {
 
 
         //GENERATE PIXELSETTINGS SCREEN
-        SideSettings optionPanel = new SideSettings(screenPanels, this, configuration);
-        settingsPanel.add(optionPanel);
+        if (openMenu) {
+            SideSettings optionPanel = new SideSettings(screenPanels, this, configuration);
+            settingsPanel.add(optionPanel);
+        }
 
 
 

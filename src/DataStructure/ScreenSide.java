@@ -22,7 +22,9 @@ public class ScreenSide {
 
     public void setPixelSize(int pixelSize) {
         while (pixels.size() < pixelSize) {
-            pixels.add(new Pixel());
+            Pixel pixel = new Pixel();
+            pixels.add(pixel);
+            pixel.setScreenSide(this);
         }
         while (pixels.size() > pixelSize) {
             pixels.remove(pixels.size() - 1);
@@ -88,5 +90,9 @@ public class ScreenSide {
         } else {
             return new ArrayList<>();
         }
+    }
+
+    public int getRotation() {
+        return rotation;
     }
 }

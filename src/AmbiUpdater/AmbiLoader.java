@@ -19,14 +19,13 @@ import java.util.HashMap;
  */
 public class AmbiLoader extends Thread implements ActionListener {
     private Timer ambitimer;
-    private double FRAMERATE = 120.0;
     private Configuration configuration;
     private ArduinoConnector arduinoConnector;
     private ArrayList<Pixel> pixelArrayList = new ArrayList<>();
     private ArrayList<Color> oldColor = new ArrayList<>();
 
     public AmbiLoader(Configuration configuration, ArduinoConnector arduinoConnector) {
-        ambitimer = new Timer((int) (1000.0 / FRAMERATE), this);
+        ambitimer = new Timer(1, this);
         this.configuration = configuration;
         this.arduinoConnector = arduinoConnector;
 
@@ -91,22 +90,13 @@ public class AmbiLoader extends Thread implements ActionListener {
         //loop();
     }
 
-    public void loop() {
-        for (Pixel pixel : pixelArrayList) {
-            pixel.setColor(new Color(255, 0, 0));
-            arduinoConnector.sendPixels(pixel);
-            System.out.println(pixel.getId());
-            try {
-                Thread.sleep(1000);
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        }
-    }
+
 
     private boolean compareColors(Color color1, Color color2) {
         int verschil = color1.getRGB() - color2.getRGB();
-        return !(verschil > 10 || verschil < 10);
+        return false;
+
+        /// TODO BETTER COLOR DIFFERENCE ALGORITHM!
     }
 
 }

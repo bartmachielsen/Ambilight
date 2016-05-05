@@ -70,7 +70,7 @@ public class Menu extends PopupMenu {
         PixelLayout.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                new LayoutGUI(configuration);
+                new LayoutGUI(configuration, false);
             }
         });
 
@@ -117,7 +117,7 @@ public class Menu extends PopupMenu {
     public static void main(String[] args) {
         Configuration configuration;
         if ((configuration = Configuration.load()) == null) {
-            new LayoutGUI(new Configuration());
+            new LayoutGUI(new Configuration(), true);
         } else {
             new Menu();
         }
