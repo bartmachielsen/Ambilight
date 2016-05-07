@@ -52,7 +52,7 @@ public class ArduinoConnector implements SerialPortEventListener {
             serialPort.addEventListener(this);
             serialPort.notifyOnDataAvailable(true);
 
-            Thread.sleep(1000);
+            Thread.sleep(2000);     //      TODO BEST TIMING FOR THIS ???
             return true;
         } catch (Exception e) {
             return false;

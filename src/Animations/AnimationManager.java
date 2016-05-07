@@ -8,6 +8,7 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.ArrayList;
+import java.util.HashMap;
 
 /**
  * Created by Bart Machielsen on 5-5-2016.
@@ -23,19 +24,24 @@ public class AnimationManager implements ActionListener {
         this.totalTime = time;
         timeLine = new ArrayList<>();
         this.arduinoConnector = arduinoConnector;
-        timeLineTimer = new Timer(1000, this);
+        timeLineTimer = new Timer(0, this);
 
 
     }
 
     public static void main(String[] args) {
-        Pixel pixel = new Pixel();
-        pixel.setId(1);
-        Animation animation = new Animation(pixel, new Color(10, 100, 200));
-        AnimationManager animationManager = new AnimationManager(100, new ArduinoConnector());
-        animationManager.addAnimation(10, 60, animation);
+
+        AnimationManager animationManager = new AnimationManager(16, new ArduinoConnector());
+
+        for (int i = 1; i < 75; i++) {
+            Pixel pixel = new Pixel();
+            pixel.setId(i);
+            Animation animation = new Animation(pixel, new Color(0, 0, 255));
+            animationManager.addAnimation(10, 15, animation);
+        }
 
         animationManager.start();
+
 
     }
 
@@ -49,8 +55,10 @@ public class AnimationManager implements ActionListener {
         if (currentTime > totalTime)
             currentTime = 0;
         for (Animation animation : timeLine) {
-            animation.animate(arduinoConnector, currentTime);
+            animation.animate(currentTime);
+
         }
+        toArduinoStrip();
         currentTime++;
     }
 
@@ -71,5 +79,26 @@ public class AnimationManager implements ActionListener {
 
     public void stop() {
         timeLineTimer.stop();
+    }
+
+    public void toArduinoStrip() {
+        HashMap<Color, ArrayList<Pixel>> colors = new HashMap<>();
+        for (Animation animation : timeLine) {
+            ArrayList<Pixel> pixelArrayList = colors.get(animation.getPixel().getColor());
+            if (pixelArrayList == null) {
+                pixelArrayList = new ArrayList<>();
+                colors.put(animation.getPixel().getColor(), pixelArrayList);
+            }
+            colors.get(animation.getPixel().getColor()).add(animation.getPixel());
+        }
+
+        for (ArrayList<Pixel> pixels : colors.values()) {
+            Pixel[] pixelArray = new Pixel[pixels.size()];
+            arduinoConnector.sendPixels(pixels.toArray(pixelArray));
+        }
+
+
+
+
     }
 }

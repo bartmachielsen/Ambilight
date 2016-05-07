@@ -24,4 +24,8 @@ public enum Effect {
         }
         return waarde;
     }
+
+    public double getAfbouwing() {
+        return afbouwing;
+    }
 }

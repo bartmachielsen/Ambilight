@@ -1,6 +1,5 @@
 package Animations;
 
-import ArduinoConnector.ArduinoConnector;
 import DataStructure.Pixel;
 
 import java.awt.*;
@@ -11,68 +10,69 @@ import java.awt.*;
 public class Animation {
     private Pixel pixel;
     private Effect startEffect, afterEffect;
-    private int startTime, endTime;
+    private int startTime, afterTime;
     private Color color;
     private Color tempColor;
-    private boolean reached = false;
+
 
     public Animation(Pixel pixel, Color color) {
         this.pixel = pixel;
         this.color = color;
         tempColor = new Color(0, 0, 0);
         startEffect = Effect.FADE;
-        startEffect = Effect.FADE;
+        afterEffect = Effect.FADE;
+
+
     }
 
-    public void animate(ArduinoConnector arduinoConnector, int currentTime) {
-        addColor(startEffect.getEffect(color.getRed()), startEffect.getEffect(color.getGreen()), startEffect.getEffect(color.getBlue()));
-
-
+    public void animate(int currentTime) {
+        if (currentTime < afterTime) {
+            if (compare(tempColor, color)) {
+                addColor(startEffect.getEffect(color.getRed()), startEffect.getEffect(color.getGreen()), startEffect.getEffect(color.getBlue()));
+            }
+        } else {
+            if (!compare(tempColor, Color.black)) {
+                addColor(-afterEffect.getEffect(color.getRed()), -afterEffect.getEffect(color.getGreen()), -afterEffect.getEffect(color.getBlue()));
+            }
+        }
         pixel.setColor(tempColor);
-        //pixel.setColor(color);
-        arduinoConnector.sendPixels(pixel);
+
+
     }
 
-    public void addColor(int red, int green, int blue) {
+
+    private void addColor(int red, int green, int blue) {
         red += tempColor.getRed();
         green += tempColor.getGreen();
         blue += tempColor.getBlue();
-        if (red > 255) {
-            red = 255;
-        }
-        if (red < 0) {
-            red = 0;
-        }
-
-        if (green > 255) {
-            green = 255;
-        }
-        if (green < 0) {
-            green = 0;
-        }
-
-        if (blue > 255) {
-            blue = 255;
-        }
-        if (blue < 0) {
-            blue = 0;
-        }
-
+        if (red > color.getRed()) red = color.getRed();
+        if (red < 0) red = 0;
+        if (green > color.getGreen()) green = color.getGreen();
+        if (green < 0) green = 0;
+        if (blue > color.getBlue()) blue = color.getBlue();
+        if (blue < 0) blue = 0;
         tempColor = new Color(red, green, blue);
     }
 
-    public void setColor(int red, int green, int blue) {
-        tempColor = new Color(red, green, blue);
-    }
 
-    public void setEffectTime(int startTime, int endTime) {
+    public void setEffectTime(int startTime, int afterTime) {
         this.startTime = startTime;
-        this.endTime = endTime;
+        this.afterTime = afterTime;
+
+        this.afterTime = (int) (afterTime - (1 / afterEffect.getAfbouwing()));
     }
 
     public void setEffects(Effect startEffect, Effect afterEffect) {
         this.startEffect = startEffect;
         this.afterEffect = afterEffect;
+    }
+
+    private boolean compare(Color color, Color color1) {
+        return color.getRGB() < color1.getRGB();
+    }
+
+    public Pixel getPixel() {
+        return pixel;
     }
 }
 

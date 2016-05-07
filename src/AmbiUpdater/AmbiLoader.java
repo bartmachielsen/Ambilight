@@ -52,7 +52,7 @@ public class AmbiLoader extends Thread implements ActionListener {
         configuration.updateAmbilight();
         ArrayList<Pixel> used = new ArrayList<>();
         for (int i = 0; i < pixelArrayList.size(); i++) {
-            if (!(compareColors(pixelArrayList.get(i).getColor(), oldColor.get(i)))) {
+            if ((compareColors(pixelArrayList.get(i).getColor(), oldColor.get(i)))) {
                 used.add(pixelArrayList.get(i));
                 oldColor.set(i, pixelArrayList.get(i).getColor());
             }
@@ -91,12 +91,9 @@ public class AmbiLoader extends Thread implements ActionListener {
     }
 
 
-
-    private boolean compareColors(Color color1, Color color2) {
-        int verschil = color1.getRGB() - color2.getRGB();
-        return false;
-
-        /// TODO BETTER COLOR DIFFERENCE ALGORITHM!
+    private boolean compareColors(Color color, Color color1) {
+        //return false;
+        return color.getRGB() > color1.getRGB() || color.getRGB() < color1.getRGB();            // TODO BETTER COLOR COMPARE ALGORITHM
     }
 
 }
