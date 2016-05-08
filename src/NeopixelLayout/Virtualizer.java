@@ -50,7 +50,6 @@ public class Virtualizer {
                         @Override
                         public void mouseClicked(MouseEvent e) {
                             super.mouseClicked(e);
-                            System.out.println("CLICKED");
 
                             Color color = JColorChooser.showDialog(null, "Select color", Color.blue);
                             if (color == null) return;

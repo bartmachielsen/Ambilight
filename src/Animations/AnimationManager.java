@@ -1,9 +1,7 @@
 package Animations;
 
 import ArduinoConnector.ArduinoConnector;
-import DataStructure.Configuration;
 import DataStructure.Pixel;
-import DataStructure.ScreenConfiguration;
 import com.google.gson.Gson;
 import com.google.gson.stream.JsonReader;
 
@@ -16,6 +14,7 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 
 /**
  * Created by Bart Machielsen on 5-5-2016.
@@ -23,33 +22,48 @@ import java.util.HashMap;
 public class AnimationManager implements ActionListener {
     private File file = new File("AnimationManager.json");
     private ArrayList<Animation> timeLine;
-    private ArduinoConnector arduinoConnector;
+    private transient ArduinoConnector arduinoConnector;
     private Timer timeLineTimer;
-    private int currentTime = 0;
+    private double currentTime = 0.0;
     private int totalTime;
 
     public AnimationManager(int time, ArduinoConnector arduinoConnector) {
         this.totalTime = time;
-        timeLine = new ArrayList<>();
         this.arduinoConnector = arduinoConnector;
-        timeLineTimer = new Timer(0, this);
+
+        timeLine = new ArrayList<>();
+        timeLineTimer = new Timer(100, this);
 
 
     }
 
     public static void main(String[] args) {
 
-        AnimationManager animationManager = new AnimationManager(16, new ArduinoConnector());
-
-        for (int i = 1; i < 75; i++) {
-            Pixel pixel = new Pixel();
-            pixel.setId(i);
-            Animation animation = new Animation(pixel, new Color(0, 0, 255));
-            animationManager.addAnimation(10, 15, animation);
-        }
-
+        AnimationManager animationManager = AnimationManager.load(new File("AnimationManager.json"));
+        animationManager.reload();
+        animationManager.setArduinoConnector(new ArduinoConnector());
         animationManager.start();
 
+
+    }
+
+    public static AnimationManager load(File file) {
+        try {
+            Gson gson = new Gson();
+            JsonReader jsonReader = gson.newJsonReader(new FileReader(file));
+            AnimationManager animationManager = gson.fromJson(jsonReader, AnimationManager.class);
+            return animationManager;
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
+    public void reload() {
+        timeLineTimer = new Timer(100, this);
+    }
+
+    public void setArduinoConnector(ArduinoConnector arduinoConnector) {
+        this.arduinoConnector = arduinoConnector;
 
     }
 
@@ -60,19 +74,16 @@ public class AnimationManager implements ActionListener {
      */
     @Override
     public void actionPerformed(ActionEvent e) {
-        if (currentTime > totalTime)
-            currentTime = 0;
+
         for (Animation animation : timeLine) {
-            animation.animate(currentTime);
+            animation.animate((int) currentTime);
 
         }
         toArduinoStrip();
-        currentTime++;
-    }
-
-    public void addAnimation(int startTime, int endTime, Animation animation) {
-        animation.setEffectTime(startTime, endTime);
-        timeLine.add(animation);
+        currentTime += 1;
+        if (currentTime > totalTime) {
+            currentTime = 0.0;
+        }
     }
 
 
@@ -80,6 +91,11 @@ public class AnimationManager implements ActionListener {
 
 
     /*         TIMERCONTROL         */
+
+    public void addAnimation(int startTime, int endTime, Animation animation) {
+        animation.setEffectTime(startTime, endTime);
+        timeLine.add(animation);
+    }
 
     public void start() {
         timeLineTimer.start();
@@ -90,14 +106,18 @@ public class AnimationManager implements ActionListener {
     }
 
     public void toArduinoStrip() {
+
+
         HashMap<Color, ArrayList<Pixel>> colors = new HashMap<>();
         for (Animation animation : timeLine) {
-            ArrayList<Pixel> pixelArrayList = colors.get(animation.getPixel().getColor());
-            if (pixelArrayList == null) {
-                pixelArrayList = new ArrayList<>();
-                colors.put(animation.getPixel().getColor(), pixelArrayList);
+            if (animation.isChanged()) {
+                ArrayList<Pixel> pixelArrayList = colors.get(animation.getPixel().getColor());
+                if (pixelArrayList == null) {
+                    pixelArrayList = new ArrayList<>();
+                    colors.put(animation.getPixel().getColor(), pixelArrayList);
+                }
+                colors.get(animation.getPixel().getColor()).add(animation.getPixel());
             }
-            colors.get(animation.getPixel().getColor()).add(animation.getPixel());
         }
 
         for (ArrayList<Pixel> pixels : colors.values()) {
@@ -105,21 +125,15 @@ public class AnimationManager implements ActionListener {
             arduinoConnector.sendPixels(pixels.toArray(pixelArray));
         }
 
+        Iterator<Animation> pixelIterator = timeLine.iterator();
+        while (pixelIterator.hasNext()) {
+            if (pixelIterator.next().isRemove()) {
+                pixelIterator.remove();
 
-
-
-    }
-
-
-    public static AnimationManager load(File file){
-        try{
-            Gson gson = new Gson();
-            JsonReader jsonReader = gson.newJsonReader(new FileReader(file));
-            AnimationManager animationManager = gson.fromJson(jsonReader,AnimationManager.class);
-            return animationManager;
-        }catch (Exception e){
-            return null;
+            }
         }
+
+
     }
 
     public void save(File file){
@@ -142,4 +156,41 @@ public class AnimationManager implements ActionListener {
     public ArrayList<Animation> getTimeLine() {
         return timeLine;
     }
+
+    public void setTimeLine(ArrayList<Animation> timeLine) {
+        this.timeLine = timeLine;
+    }
+
+    public double getCurrentTime() {
+        return currentTime;
+    }
+
+    public void setCurrentTime(double currentTime) {
+        this.currentTime = currentTime;
+    }
+
+    public int getTotalTime() {
+        return totalTime;
+    }
+
+    public void setTotalTime(int totalTime) {
+        this.totalTime = totalTime;
+    }
+
+    public boolean isRunning() {
+        if (timeLineTimer == null) {
+            return false;
+        } else {
+            return timeLineTimer.isRunning();
+        }
+    }
+
+    public void speedUp() {
+        int delay = timeLineTimer.getDelay() - 10;
+        if (delay < 0) delay = 100;
+        System.out.println(delay);
+        timeLineTimer.setDelay(delay);
+
+    }
+
 }

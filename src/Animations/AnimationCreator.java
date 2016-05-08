@@ -6,27 +6,28 @@ import DataStructure.*;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
-import java.awt.geom.Ellipse2D;
-import java.awt.geom.Line2D;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.util.ArrayList;
-import java.util.Comparator;
 
 /**
  * Created by Bart on 7-5-2016.
  */
 public class AnimationCreator extends JFrame {
-    public static void main(String[] args){
-        new AnimationCreator(AnimationManager.load(new File("AnimationManager.json")));
-    }
-
-   private AnimationManager animationManager;
     private TimeLinePanel timeLine;
+    private boolean running, created;
     public AnimationCreator(AnimationManager animationManager){
         super();
         setVisible(true);
+        if (animationManager == null) {
+            animationManager = new AnimationManager(100, null);
+        }
+
+        animationManager.reload();
+
+        running = false;
+        created = false;
 
          /*     TESTPORPOSES */
         //animationManager.addAnimation(10,35,new Animation(new Pixel(2),Color.blue));
@@ -37,22 +38,196 @@ public class AnimationCreator extends JFrame {
 
         /* OTHER THEN LOADING TODO SEARCH BEST WAY FOR LOADING*/
         Configuration configuration = Configuration.load();
-
+        final AnimationManager animationManager1 = animationManager;
 
         addWindowListener(new WindowAdapter() {
             @Override
             public void windowClosing(WindowEvent windowEvent) {
                 super.windowClosing(windowEvent);
+                //animationManager1.stop(); // TODO EXTRA SAFETY
                 configuration.save();
-                animationManager.save();
+                animationManager1.save();
             }
         });
-        timeLine = new TimeLinePanel(animationManager,configuration);
-        timeLine.setLayout(null);
-        setContentPane(timeLine);
+
+
+        SpringLayout springLayout = new SpringLayout();
+        JPanel contentPane = new JPanel(springLayout);
+        setContentPane(contentPane);
+
+        JPanel controlPanel = new JPanel(new GridLayout(1, 8));
+        JButton addAll = new JButton("Animate All");
+        controlPanel.add(addAll);
+        addAll.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                Animation animation = new Animation(configuration.getLayoutGraphicses().get(0).getScreenSides().get(0).getPixels().get(0), Color.white);
+                AnimationForm.editAnimation(animation);
+                for (ScreenConfiguration screenConfiguration : configuration.getLayoutGraphicses()) {
+                    for (ScreenSide screenSide : screenConfiguration.getScreenSides()) {
+                        for (Pixel pixel : screenSide.getPixels()) {
+                            Animation animation1 = animation.getInstance();
+                            animation1.setPixel(pixel);
+                            animationManager1.addAnimation(animation.getStartTime(), animation.getAfterTime(), animation1);
+
+                        }
+                    }
+                }
+
+            }
+        });
+        contentPane.add(controlPanel);
+
+
+        JButton moveRandom = new JButton("Place Random");
+        moveRandom.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                for (Animation animation : animationManager1.getTimeLine()) {
+                    int start = (int) (Math.random() * animationManager1.getTotalTime());
+
+                    animation.setEffectTime(start, (animation.getAfterTime() - animation.getStartTime() + start));
+                }
+            }
+        });
+
+        controlPanel.add(moveRandom);
+
+        JButton randomColor = new JButton("Random color");
+        controlPanel.add(randomColor);
+        randomColor.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                for (Animation animation : animationManager1.getTimeLine()) {
+                    animation.setColor(new Color((int) (Math.random() * 255), (int) (Math.random() * 255), (int) (Math.random() * 255)));
+                }
+            }
+        });
+
+        JButton randomSize = new JButton("Random Size");
+        controlPanel.add(randomSize);
+        randomSize.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                for (Animation animation : animationManager1.getTimeLine()) {
+                    int start = animation.getStartTime();
+                    int eind = 10000;
+                    int trys = 0;
+                    while (eind > animationManager1.getTotalTime()) {
+                        eind = (int) (start + Math.random() * animationManager1.getTotalTime());
+                        trys++;
+                        if (trys > 10) {
+                            start -= 100;
+                            if (start < 0) {
+                                start = 0;
+                            }
+                            trys = 0;
+                        }
+                    }
+                    animation.setEffectTime(start, eind);
+                }
+            }
+        });
+
+
+        JButton deleteAll = new JButton("Remove All");
+        deleteAll.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                for (Animation animation : animationManager1.getTimeLine()) {
+                    animation.setRemove(true);
+                }
+            }
+        });
+        controlPanel.add(deleteAll);
+
+
+        JPanel arduinoControl = new JPanel(new GridLayout(3, 1));
+        JButton pause = new JButton("Pause");
+        JButton play = new JButton("Play");
+        JButton speed = new JButton("Speed");
+        arduinoControl.add(pause);
+        arduinoControl.add(play);
+        arduinoControl.add(speed);
+        pause.setEnabled(false);
+        play.setEnabled(false);
+        speed.setEnabled(false);
+
+
+        JButton toArduino = new JButton("ToArduino");
+        controlPanel.add(toArduino);
+        toArduino.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                if (!created) {
+                    animationManager1.setArduinoConnector(new ArduinoConnector());
+                    created = true;
+                    pause.setEnabled(true);
+                    play.setEnabled(true);
+                    speed.setEnabled(true);
+                }
+
+
+            }
+        });
+
+
+        controlPanel.add(arduinoControl);
+
+
+        pause.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                animationManager1.stop();
+            }
+        });
+
+        play.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                animationManager1.start();
+            }
+        });
+
+        speed.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                animationManager1.speedUp();
+            }
+        });
+
+
+        //ArrayList<ScreenSide> screenSides = configuration.getLayoutGraphicses().get(0).getScreenSides();
+        ArrayList<ScreenSide> screenSides = new ArrayList<>();
+        for (ScreenConfiguration screenConfiguration : configuration.getLayoutGraphicses()) {
+            screenSides.addAll(screenConfiguration.getScreenSides());
+
+        }
+        timeLine = new TimeLinePanel(animationManager, screenSides);
+        contentPane.add(timeLine);
+
+
+        springLayout.putConstraint(SpringLayout.NORTH, controlPanel, 0, SpringLayout.NORTH, contentPane);
+        springLayout.putConstraint(SpringLayout.EAST, controlPanel, 0, SpringLayout.EAST, contentPane);
+        springLayout.putConstraint(SpringLayout.WEST, controlPanel, 0, SpringLayout.WEST, contentPane);
+        springLayout.putConstraint(SpringLayout.SOUTH, controlPanel, 50, SpringLayout.NORTH, contentPane);
+
+        springLayout.putConstraint(SpringLayout.NORTH, timeLine, 0, SpringLayout.SOUTH, controlPanel);
+        springLayout.putConstraint(SpringLayout.EAST, timeLine, 0, SpringLayout.EAST, contentPane);
+        springLayout.putConstraint(SpringLayout.WEST, timeLine, 0, SpringLayout.WEST, contentPane);
+        springLayout.putConstraint(SpringLayout.SOUTH, timeLine, 50, SpringLayout.SOUTH, contentPane);
+
+
+
+
+
         repaint();
         revalidate();
 
+    }
+
+    public static void main(String[] args) {
+        new AnimationCreator(AnimationManager.load(new File("AnimationManager.json")));
     }
 
 
@@ -63,27 +238,20 @@ public class AnimationCreator extends JFrame {
 }
 
 class TimeLinePanel extends JPanel implements ActionListener, MouseMotionListener{
-    private AnimationManager animationManager;
-    private Configuration configuration;
-    private BufferedImage backgroundImage;
     ArrayList<Pixel> pixelArrayList = new ArrayList<>();
-    private double currentTime,maxTime;
+    private AnimationManager animationManager;
+    private BufferedImage backgroundImage;
     private Timer timer = new Timer(1,this);
     private Animation selected = null;
 
-
-    public TimeLinePanel(AnimationManager animationManager, Configuration configuration){
+    public TimeLinePanel(AnimationManager animationManager, ArrayList<ScreenSide> screenSides) {
         this.animationManager = animationManager;
-        this.configuration = configuration;
-        this.currentTime = 0;
-        this.maxTime = 100;
 
-        for(ScreenConfiguration screenConfiguration : configuration.getLayoutGraphicses()){
-            for(ScreenSide screenSide : screenConfiguration.getScreenSides()){
-                pixelArrayList.addAll(screenSide.getPixels());
-
-            }
+        for (ScreenSide screenSide : screenSides) {
+            pixelArrayList.addAll(screenSide.getPixels());
         }
+
+
         pixelArrayList.sort(new PixelSortComparater());
 
         addMouseMotionListener(this);
@@ -95,13 +263,8 @@ class TimeLinePanel extends JPanel implements ActionListener, MouseMotionListene
 
             @Override
             public void mousePressed(MouseEvent mouseEvent) {
-                //super.mousePressed(mouseEvent);
-                System.out.println(mouseEvent.getClickCount());
-                if(mouseEvent.getClickCount() > 1){
-                    System.out.println("CLICKED LOT");
-                }else {
                     int stapgrootte = getHeight() / pixelArrayList.size();
-                    double selectedTime = mouseEvent.getX() / (getWidth() / maxTime);
+                double selectedTime = mouseEvent.getX() / (getWidth() / animationManager.getTotalTime());
                     selected = null;
 
                     int positie = (int) (Math.floor(mouseEvent.getY() / stapgrootte));
@@ -109,15 +272,26 @@ class TimeLinePanel extends JPanel implements ActionListener, MouseMotionListene
                         if (animation.getStartTime() < selectedTime && animation.getAfterTime() > selectedTime) {
                             if (search(animation.getPixel()) == positie) {
                                 selected = animation;
+                                if (mouseEvent.getClickCount() == 2) {
+                                    AnimationForm.editAnimation(animation);
+
+                                }
                             }
                         }
                     }
                     if (selected == null) {
-                        currentTime = selectedTime;
+                        animationManager.setCurrentTime((int) selectedTime);
                         repaint();
+
+                        if (mouseEvent.getClickCount() == 2) {
+                            int positie2 = (int) (Math.floor(mouseEvent.getY() / (getHeight() / pixelArrayList.size())));
+                            Animation animation = new Animation(pixelArrayList.get(positie2), Color.white);
+                            AnimationForm.editAnimation(animation);
+                            animationManager.addAnimation(animation.getStartTime(), animation.getAfterTime(), animation);
+                        }
                     }
                 }
-            }
+
 
             @Override
             public void mouseClicked(MouseEvent mouseEvent) {
@@ -142,8 +316,8 @@ class TimeLinePanel extends JPanel implements ActionListener, MouseMotionListene
     @Override
     public void mouseDragged(MouseEvent mouseEvent) {
         if(selected != null){
-            double selectedTime = mouseEvent.getX()/(getWidth()/maxTime);
-            int time = (int)(Math.floor(selectedTime));
+            double selectedTime = mouseEvent.getX() / (getWidth() / animationManager.getTotalTime());
+            int time = (int) (Math.floor(selectedTime));             //      TODO SOLUTION FOR WRONG X POSITION WHEN DRAGGING
             selected.setEffectTime(time,selected.getAfterTime() - selected.getStartTime() + time);
             repaint();
 
@@ -159,11 +333,20 @@ class TimeLinePanel extends JPanel implements ActionListener, MouseMotionListene
 
     @Override
     public void actionPerformed(ActionEvent actionEvent) {
-        currentTime += .01;
 
-        if(currentTime > maxTime){
-            currentTime = 0.0;
-        }
+        //if(!animationManager.isRunning()){
+        //  animationManager.setCurrentTime(animationManager.getCurrentTime() + 0.01);
+        //}
+
+        //  TODO INTERFERING
+
+      /*  Iterator<Animation> pixelIterator = animationManager.getTimeLine().iterator();
+        while(pixelIterator.hasNext()){
+            if(pixelIterator.next().isRemove()){
+                pixelIterator.remove();
+            }
+        }*/
+
         repaint();
     }
 
@@ -180,12 +363,15 @@ class TimeLinePanel extends JPanel implements ActionListener, MouseMotionListene
         this.backgroundImage = new BufferedImage(getWidth(),getHeight(),BufferedImage.TYPE_INT_ARGB);
         Graphics2D graphics2D = (Graphics2D) backgroundImage.getGraphics();
 
-        graphics2D.setFont(new Font("Arial",Font.BOLD,30));
 
-        int x = 0;
-        int y = 0;
-        int stap = getHeight()/pixelArrayList.size();
+        double x = 0;
+        double y = 0;
+        double stap = (getHeight() - 50) / (double) pixelArrayList.size();
         Color[] colors = { new Color(163,255,78), new Color(86,214,255)};
+
+        graphics2D.setFont(new Font("Arial", Font.BOLD, (int) stap));
+
+
 
         for(int i = 0; i < pixelArrayList.size(); i++){
             Rectangle2D rectangle2D = new Rectangle2D.Double(x,y,getWidth(),y+stap);
@@ -193,21 +379,24 @@ class TimeLinePanel extends JPanel implements ActionListener, MouseMotionListene
             graphics2D.setColor(colors[i%colors.length]);
             graphics2D.fill(rectangle2D);
 
-            //graphics2D.setColor(colors[(i+1)%colors.length]);
-            graphics2D.setColor(Color.black);
-            graphics2D.drawString("Pixel " + pixelArrayList.get(i).getId(),(int)(getWidth()/2.0)-graphics2D.getFont().getSize(),y-(graphics2D.getFont().getSize()/2));
+            graphics2D.setColor(colors[(i + 1) % colors.length]);
+            //graphics2D.setColor(Color.black);
+            graphics2D.drawString("Pixel " + pixelArrayList.get(i).getId(), (int) (getWidth() / 2.0) - graphics2D.getFont().getSize(), (int) (y - (graphics2D.getFont().getSize() / 8)));
         }
 
         for(Animation animation : animationManager.getTimeLine()){
-            double calculation = getWidth()/maxTime;
+            if (animation.isRemove()) {
+                continue;
+            }
+            double calculation = getWidth() / animationManager.getTotalTime();
             Rectangle2D animationRectangle = new Rectangle2D.Double(calculation*animation.getStartTime(),
                                                                     (search(animation.getPixel()))*stap,
                                                                     calculation*animation.getAfterTime()-calculation*animation.getStartTime(),
                                                                     stap);
-            Color color = colors[(search(animation.getPixel())%colors.length)];
-            //graphics2D.setColor(color.darker());
-            graphics2D.setColor(new Color(color.getRed(),color.getGreen(),color.getBlue(),128));
-            if(Math.floor(currentTime) >= animation.getStartTime() && Math.floor(currentTime) < animation.getAfterTime()){
+            //Color color = colors[(search(animation.getPixel())%colors.length)];
+            Color color = animation.getColor();
+            graphics2D.setColor(new Color(color.getRed(), color.getGreen(), color.getBlue(), 50));
+            if (Math.floor(animationManager.getCurrentTime()) >= animation.getStartTime() && Math.floor(animationManager.getCurrentTime()) < animation.getAfterTime()) {
                 graphics2D.setColor(animation.getColor());
             }
             graphics2D.fill(animationRectangle);
@@ -217,7 +406,7 @@ class TimeLinePanel extends JPanel implements ActionListener, MouseMotionListene
 
         }
 
-        Rectangle2D rectangle2D = new Rectangle2D.Double((getWidth()/maxTime)*currentTime,0,10,getHeight());
+        Rectangle2D rectangle2D = new Rectangle2D.Double((getWidth() / animationManager.getTotalTime()) * animationManager.getCurrentTime(), 0, 10, getHeight());
 
         graphics2D.setColor(new Color(0,0,0,128));
         graphics2D.fill(rectangle2D);

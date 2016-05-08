@@ -14,6 +14,8 @@ public class Animation {
     private double afterDoubleTime;
     private Color color;
     private Color tempColor;
+    private boolean remove = false;
+    private boolean changed = false;
 
 
     public Animation(Pixel pixel, Color color) {
@@ -26,18 +28,27 @@ public class Animation {
 
     }
 
+
     public void animate(int currentTime) {
-        if (currentTime < afterDoubleTime) {
-            if (compare(tempColor, color)) {
-                addColor(startEffect.getEffect(color.getRed()), startEffect.getEffect(color.getGreen()), startEffect.getEffect(color.getBlue()));
+        if (remove) return;
+        changed = false;
+        if (currentTime >= startTime) {
+            if (currentTime < afterDoubleTime) {
+                if (compare(tempColor, color)) {
+                    addColor(startEffect.getEffect(color.getRed()), startEffect.getEffect(color.getGreen()), startEffect.getEffect(color.getBlue()));
+                }
+            } else {
+                if (!compare(tempColor, Color.black)) {
+                    addColor(-afterEffect.getEffect(color.getRed()), -afterEffect.getEffect(color.getGreen()), -afterEffect.getEffect(color.getBlue()));
+                }
             }
+            pixel.setColor(tempColor);
         } else {
-            if (!compare(tempColor, Color.black)) {
-                addColor(-afterEffect.getEffect(color.getRed()), -afterEffect.getEffect(color.getGreen()), -afterEffect.getEffect(color.getBlue()));
+            if (pixel.getColor() != Color.black) {
+                pixel.setColor(Color.black);
+                changed = true;
             }
         }
-        pixel.setColor(tempColor);
-
 
     }
 
@@ -53,6 +64,7 @@ public class Animation {
         if (blue > color.getBlue()) blue = color.getBlue();
         if (blue < 0) blue = 0;
         tempColor = new Color(red, green, blue);
+        changed = true;
     }
 
 
@@ -76,6 +88,9 @@ public class Animation {
         return pixel;
     }
 
+    public void setPixel(Pixel pixel) {
+        this.pixel = pixel;
+    }
 
     public int getStartTime() {
         return startTime;
@@ -89,5 +104,48 @@ public class Animation {
         return color;
     }
 
+    public void setColor(Color color) {
+        this.color = color;
+    }
+
+    public Effect getAfterEffect() {
+        return afterEffect;
+    }
+
+    public void setAfterEffect(Effect afterEffect) {
+        this.afterEffect = afterEffect;
+    }
+
+    public Effect getStartEffect() {
+        return startEffect;
+    }
+
+    public void setStartEffect(Effect startEffect) {
+        this.startEffect = startEffect;
+    }
+
+    public boolean isRemove() {
+        return remove;
+    }
+
+    public void setRemove(boolean remove) {
+        this.remove = remove;
+        if (remove) {
+            changed = true;
+            pixel.setColor(Color.black);
+        }
+    }
+
+
+    public Animation getInstance() {
+        Animation animation = new Animation(pixel, color);
+        animation.setEffects(startEffect, afterEffect);
+        animation.setEffectTime(startTime, afterTime);
+        return animation;
+    }
+
+    public boolean isChanged() {
+        return changed;
+    }
 }
 

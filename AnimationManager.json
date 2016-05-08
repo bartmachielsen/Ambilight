@@ -1,1 +1,15 @@
-{"file":{"path":"AnimationManager.json"},"timeLine":[{"pixel":{"id":2,"verhoudingX":0.0,"verhoudingY":0.0,"idForced":false,"checkWidth":0,"checkHeight":0,"checkX":0,"checkY":0},"startEffect":"FADE","afterEffect":"FADE","startTime":20,"afterTime":45,"afterDoubleTime":35.0,"color":{"value":-16776961,"falpha":0.0},"tempColor":{"value":-16777216,"falpha":0.0}},{"pixel":{"id":3,"verhoudingX":0.0,"verhoudingY":0.0,"idForced":false,"checkWidth":0,"checkHeight":0,"checkX":0,"checkY":0},"startEffect":"FADE","afterEffect":"FADE","startTime":26,"afterTime":71,"afterDoubleTime":61.0,"color":{"value":-256,"falpha":0.0},"tempColor":{"value":-16777216,"falpha":0.0}}],"timeLineTimer":{"listenerList":{},"initialDelay":0,"delay":0,"repeats":true,"coalesce":true},"currentTime":0,"totalTime":100}
+{
+  "file": {
+    "path": "AnimationManager.json"
+  },
+  "timeLine": [],
+  "timeLineTimer": {
+    "listenerList": {},
+    "initialDelay": 100,
+    "delay": 100,
+    "repeats": true,
+    "coalesce": true
+  },
+  "currentTime": 96.0,
+  "totalTime": 100
+}
