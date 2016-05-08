@@ -1,12 +1,19 @@
 package Animations;
 
 import ArduinoConnector.ArduinoConnector;
+import DataStructure.Configuration;
 import DataStructure.Pixel;
+import DataStructure.ScreenConfiguration;
+import com.google.gson.Gson;
+import com.google.gson.stream.JsonReader;
 
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.File;
+import java.io.FileReader;
+import java.io.FileWriter;
 import java.util.ArrayList;
 import java.util.HashMap;
 
@@ -14,6 +21,7 @@ import java.util.HashMap;
  * Created by Bart Machielsen on 5-5-2016.
  */
 public class AnimationManager implements ActionListener {
+    private File file = new File("AnimationManager.json");
     private ArrayList<Animation> timeLine;
     private ArduinoConnector arduinoConnector;
     private Timer timeLineTimer;
@@ -100,5 +108,38 @@ public class AnimationManager implements ActionListener {
 
 
 
+    }
+
+
+    public static AnimationManager load(File file){
+        try{
+            Gson gson = new Gson();
+            JsonReader jsonReader = gson.newJsonReader(new FileReader(file));
+            AnimationManager animationManager = gson.fromJson(jsonReader,AnimationManager.class);
+            return animationManager;
+        }catch (Exception e){
+            return null;
+        }
+    }
+
+    public void save(File file){
+        try{
+            Gson gson = new Gson();
+            String json = gson.toJson(this);
+
+            FileWriter fileWriter = new FileWriter(file);
+            fileWriter.write(json);
+            fileWriter.close();
+
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+    }
+    public void save(){
+        save(file);
+    }
+
+    public ArrayList<Animation> getTimeLine() {
+        return timeLine;
     }
 }

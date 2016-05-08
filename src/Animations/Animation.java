@@ -11,6 +11,7 @@ public class Animation {
     private Pixel pixel;
     private Effect startEffect, afterEffect;
     private int startTime, afterTime;
+    private double afterDoubleTime;
     private Color color;
     private Color tempColor;
 
@@ -26,7 +27,7 @@ public class Animation {
     }
 
     public void animate(int currentTime) {
-        if (currentTime < afterTime) {
+        if (currentTime < afterDoubleTime) {
             if (compare(tempColor, color)) {
                 addColor(startEffect.getEffect(color.getRed()), startEffect.getEffect(color.getGreen()), startEffect.getEffect(color.getBlue()));
             }
@@ -59,7 +60,7 @@ public class Animation {
         this.startTime = startTime;
         this.afterTime = afterTime;
 
-        this.afterTime = (int) (afterTime - (1 / afterEffect.getAfbouwing()));
+        this.afterDoubleTime = (int) (afterTime - (1 / afterEffect.getAfbouwing()));
     }
 
     public void setEffects(Effect startEffect, Effect afterEffect) {
@@ -74,5 +75,19 @@ public class Animation {
     public Pixel getPixel() {
         return pixel;
     }
+
+
+    public int getStartTime() {
+        return startTime;
+    }
+
+    public int getAfterTime() {
+        return afterTime;
+    }
+
+    public Color getColor() {
+        return color;
+    }
+
 }
 

@@ -21,6 +21,10 @@ public class Pixel {
         this.checkHeight = 100;
 
     }
+    public Pixel(int id){
+        super();
+        setId(id);
+    }
 
 
 
