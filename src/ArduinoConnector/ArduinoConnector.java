@@ -6,6 +6,7 @@ import gnu.io.SerialPort;
 import gnu.io.SerialPortEvent;
 import gnu.io.SerialPortEventListener;
 
+import javax.swing.*;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
@@ -27,6 +28,11 @@ public class ArduinoConnector implements SerialPortEventListener {
 
     }
 
+    public ArduinoConnector(CommPortIdentifier commPortIdentifier) {
+        connect(commPortIdentifier);
+    }
+
+
     public static CommPortIdentifier[] getAvailablePorts() {
         Enumeration ports = CommPortIdentifier.getPortIdentifiers();
         ArrayList<CommPortIdentifier> commPortIdentifiers = new ArrayList<>();
@@ -38,6 +44,22 @@ public class ArduinoConnector implements SerialPortEventListener {
         return commPortIdentifiers.toArray(commPortIdentifiers1);
 
 
+    }
+
+    public static ArduinoConnector selectArduinoConnector() {
+        CommPortIdentifier[] commPortIdentifiers = ArduinoConnector.getAvailablePorts();
+        Object[] objects = new Object[commPortIdentifiers.length];
+        for (int i = 0; i < objects.length; i++) {
+            objects[i] = commPortIdentifiers[i].getName();
+        }
+        int choice = JOptionPane.showOptionDialog(null, "Connect to Arduino", null, JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE, null, objects, objects[0]);
+
+
+        return new ArduinoConnector(commPortIdentifiers[choice]);
+    }
+
+    public static void main(String[] args) {
+        ArduinoConnector.selectArduinoConnector();
     }
 
     public boolean connect(CommPortIdentifier commPortIdentifier) {
@@ -97,4 +119,5 @@ public class ArduinoConnector implements SerialPortEventListener {
             }
         }
     }
+
 }

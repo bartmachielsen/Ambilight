@@ -1,6 +1,8 @@
 package MenuConfig;
 
 import AmbiUpdater.AmbiLoader;
+import Animations.AnimationCreator;
+import Animations.AnimationManager;
 import ArduinoConnector.ArduinoConnector;
 import DataStructure.Configuration;
 import NeopixelLayout.LayoutGUI;
@@ -13,6 +15,7 @@ import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.io.File;
+import java.util.ArrayList;
 
 /**
  * Created by Bart Machielsen on 2-5-2016.
@@ -20,8 +23,13 @@ import java.io.File;
 public class Menu extends PopupMenu {
     private boolean started = false;
     private Configuration configuration = Configuration.load();
+    private ArduinoConnector arduinoConnector;
+    private AnimationManager selected = null;
+
 
     public Menu() {
+
+        arduinoConnector = ArduinoConnector.selectArduinoConnector();
 
         /* GETTING BULBICON AND SETTING IT AS ICON*/
         TrayIcon trayIcon = null;
@@ -47,11 +55,15 @@ public class Menu extends PopupMenu {
 
 
         CheckboxMenuItem cb2 = new CheckboxMenuItem("Ambilight Controller");
-        AmbiLoader ambiLoader = new AmbiLoader(configuration, new ArduinoConnector());
+        AmbiLoader ambiLoader = new AmbiLoader(configuration, arduinoConnector);
         cb2.addItemListener(new ItemListener() {
             @Override
             public void itemStateChanged(ItemEvent e) {
-                System.out.println(cb2.getState());
+                if (selected != null) {
+                    selected.stop();
+                    selected = null;
+                }
+
                 if (cb2.getState()) {
                     if (!started) {
                         started = true;
@@ -92,7 +104,49 @@ public class Menu extends PopupMenu {
         });
 
 
+        ArrayList<AnimationManager> animationManagers = AnimationCreator.loadAll();
+
+
         //Add components to pop-up menu
+        for (AnimationManager animationManager : animationManagers) {
+            animationManager.reload();
+            animationManager.setArduinoConnector(arduinoConnector);
+            MenuItem menuItem = new MenuItem(animationManager.getName());
+            add(menuItem);
+            menuItem.addActionListener(new ActionListener() {
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    if (selected != null) {
+                        if (selected == animationManager) {
+                            animationManager.stop();
+                            selected = null;
+                            ambiLoader.setColor(Color.black);
+                        } else {
+                            selected.stop();
+                            selected = animationManager;
+                            animationManager.start();
+                        }
+                    } else {
+                        selected = animationManager;
+                        animationManager.start();
+
+                    }
+                }
+            });
+        }
+        MenuItem createSheme = new MenuItem("New Animation");
+        createSheme.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                if (selected != null) {
+                    selected.stop();
+                    selected = null;
+                }
+                new AnimationCreator(new AnimationManager(100, arduinoConnector), true);
+            }
+        });
+        add(createSheme);
+        addSeparator();
         add(PixelLayout);
         addSeparator();
         add(cb2);

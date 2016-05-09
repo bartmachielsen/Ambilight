@@ -17,24 +17,39 @@ import java.util.ArrayList;
 public class AnimationCreator extends JFrame {
     private TimeLinePanel timeLine;
     private boolean running, created;
-    public AnimationCreator(AnimationManager animationManager){
+
+    public AnimationCreator(AnimationManager animationManager, boolean creation) {
         super();
         setVisible(true);
         if (animationManager == null) {
             animationManager = new AnimationManager(100, null);
         }
 
-        animationManager.reload();
+        if (!creation) {
+            animationManager.reload();
+        }
+
+        if (animationManager.getName().equals("new AnimationManager")) {
+            animationManager.setName(JOptionPane.showInputDialog(null, "Name Scheme:", "New AnimationManager", JOptionPane.QUESTION_MESSAGE));
+        }
+
+
+
 
         running = false;
-        created = false;
+        created = creation;
 
          /*     TESTPORPOSES */
         //animationManager.addAnimation(10,35,new Animation(new Pixel(2),Color.blue));
         //animationManager.addAnimation(20,65,new Animation(new Pixel(3),Color.YELLOW));
         setSize(1000,1000);
         setLocationRelativeTo(null);
-        setDefaultCloseOperation(EXIT_ON_CLOSE);
+        if (!creation) {
+            setDefaultCloseOperation(EXIT_ON_CLOSE);
+        } else {
+            animationManager.stop();
+            setDefaultCloseOperation(HIDE_ON_CLOSE);
+        }
 
         /* OTHER THEN LOADING TODO SEARCH BEST WAY FOR LOADING*/
         Configuration configuration = Configuration.load();
@@ -162,10 +177,11 @@ public class AnimationCreator extends JFrame {
                 if (!created) {
                     animationManager1.setArduinoConnector(new ArduinoConnector());
                     created = true;
-                    pause.setEnabled(true);
-                    play.setEnabled(true);
-                    speed.setEnabled(true);
+
                 }
+                pause.setEnabled(true);
+                play.setEnabled(true);
+                speed.setEnabled(true);
 
 
             }
@@ -196,8 +212,6 @@ public class AnimationCreator extends JFrame {
             }
         });
 
-
-        //ArrayList<ScreenSide> screenSides = configuration.getLayoutGraphicses().get(0).getScreenSides();
         ArrayList<ScreenSide> screenSides = new ArrayList<>();
         for (ScreenConfiguration screenConfiguration : configuration.getLayoutGraphicses()) {
             screenSides.addAll(screenConfiguration.getScreenSides());
@@ -224,10 +238,30 @@ public class AnimationCreator extends JFrame {
         repaint();
         revalidate();
 
+
     }
 
+
+    public static ArrayList<AnimationManager> loadAll() {
+        ArrayList<AnimationManager> animationManagers = new ArrayList<>();
+        File directory = new File("AnimationManagers");
+        for (File file : directory.listFiles()) {
+            if (file.getName().contains(".json")) {
+                if (!file.getName().contains("PixelLayout")) {
+                    animationManagers.add(AnimationManager.load(file));
+                }
+            }
+        }
+
+
+        return animationManagers;
+    }
+
+
+
+
     public static void main(String[] args) {
-        new AnimationCreator(AnimationManager.load(new File("AnimationManager.json")));
+        new AnimationCreator(AnimationManager.load(new File("AnimationManager.json")), false);
     }
 
 
@@ -412,6 +446,7 @@ class TimeLinePanel extends JPanel implements ActionListener, MouseMotionListene
         graphics2D.fill(rectangle2D);
 
     }
+
 
 }
 

@@ -20,7 +20,7 @@ import java.util.Iterator;
  * Created by Bart Machielsen on 5-5-2016.
  */
 public class AnimationManager implements ActionListener {
-    private File file = new File("AnimationManager.json");
+    private String name = "new AnimationManager";
     private ArrayList<Animation> timeLine;
     private transient ArduinoConnector arduinoConnector;
     private Timer timeLineTimer;
@@ -33,16 +33,6 @@ public class AnimationManager implements ActionListener {
 
         timeLine = new ArrayList<>();
         timeLineTimer = new Timer(100, this);
-
-
-    }
-
-    public static void main(String[] args) {
-
-        AnimationManager animationManager = AnimationManager.load(new File("AnimationManager.json"));
-        animationManager.reload();
-        animationManager.setArduinoConnector(new ArduinoConnector());
-        animationManager.start();
 
 
     }
@@ -102,12 +92,12 @@ public class AnimationManager implements ActionListener {
     }
 
     public void stop() {
-        timeLineTimer.stop();
+        if (timeLineTimer.isRunning()) {
+            timeLineTimer.stop();
+        }
     }
 
     public void toArduinoStrip() {
-
-
         HashMap<Color, ArrayList<Pixel>> colors = new HashMap<>();
         for (Animation animation : timeLine) {
             if (animation.isChanged()) {
@@ -150,7 +140,7 @@ public class AnimationManager implements ActionListener {
         }
     }
     public void save(){
-        save(file);
+        save(new File("AnimationManagers/" + name + ".json"));
     }
 
     public ArrayList<Animation> getTimeLine() {
@@ -193,4 +183,12 @@ public class AnimationManager implements ActionListener {
 
     }
 
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
 }
